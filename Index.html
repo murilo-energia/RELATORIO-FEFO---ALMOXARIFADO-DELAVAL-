@@ -1,567 +1,410 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Controle de Vencimento de Produtos - Grupo Energia</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome icons -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- PapaParse para ler CSV -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: #0f172a;
-            color: #f8fafc;
-        }
-        .glass-card {
-            background: rgba(30, 41, 59, 0.7);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-        }
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: #0f172a;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background: #334155;
-            border-radius: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-            background: #475569;
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BI Almoxarifado FEFO — Grupo Energia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
+<style>
+  :root{
+    --orange: #DF7F24;
+    --orange-dark: #C56A16;
+    --charcoal: #252525;
+    --charcoal-2: #55534D;
+    --bg: #FAF7F2;
+    --card: #FFFFFF;
+    --border: #E8E2D8;
+    --ok: #4C8A2C;      --ok-bg: #EAF3DE;
+    --alerta: #C88A1E;  --alerta-bg: #FCEFD9;
+    --vencido: #B6392F; --vencido-bg: #FBE7E5;
+    --vazio: #8A887F;   --vazio-bg: #EFECE4;
+    --radius: 10px;
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; background:var(--bg); color:var(--charcoal);
+    font-family:'Inter', sans-serif; padding:24px 16px 64px;
+  }
+  .wrap{ max-width:1100px; margin:0 auto; }
+
+  header{
+    display:flex; align-items:flex-start; justify-content:space-between;
+    flex-wrap:wrap; gap:12px; margin-bottom:22px;
+  }
+  header h1{ font-family:'Manrope',sans-serif; font-weight:700; font-size:22px; margin:0 0 4px; }
+  header p{ margin:0; font-size:13px; color:var(--charcoal-2); }
+  #statusBar{ font-size:12px; color:var(--charcoal-2); display:flex; align-items:center; gap:8px; }
+  #statusBar button{
+    font-family:'Inter',sans-serif; font-size:12px; padding:6px 12px;
+    border-radius:var(--radius); border:1px solid var(--border); background:#fff;
+    cursor:pointer; color:var(--charcoal);
+  }
+  #statusBar button:hover{ border-color:var(--orange); color:var(--orange-dark); }
+
+  .filtros{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; }
+  .filtros select{
+    font-family:'Inter',sans-serif; font-size:13px; padding:9px 12px;
+    border-radius:var(--radius); border:1px solid var(--border); background:#fff;
+    color:var(--charcoal); min-width:140px; flex:1;
+  }
+
+  .kpis{ display:grid; grid-template-columns:repeat(auto-fit, minmax(160px,1fr)); gap:12px; margin-bottom:18px; }
+  .kpi{ background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px; border-left:3px solid var(--orange); }
+  .kpi span{ display:block; font-size:12px; color:var(--charcoal-2); margin-bottom:4px; }
+  .kpi strong{ font-family:'Manrope',sans-serif; font-size:26px; font-weight:700; }
+  .kpi small{ display:block; font-size:11px; color:var(--charcoal-2); margin-top:2px; }
+
+  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
+  @media (max-width: 760px){ .grid2{ grid-template-columns:1fr; } }
+
+  section{ background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px; margin-bottom:16px; }
+  section h2{ font-family:'Manrope',sans-serif; font-size:14px; font-weight:600; margin:0 0 4px; }
+  section .sub{ font-size:12px; color:var(--charcoal-2); margin:0 0 14px; }
+  .chart-box{ position:relative; height:240px; }
+  .chart-box.tall{ height:280px; }
+
+  table{ width:100%; border-collapse:collapse; font-size:13px; }
+  th{ text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.02em; color:var(--charcoal-2); font-weight:600; padding:0 8px 8px; border-bottom:1px solid var(--border); }
+  td{ padding:9px 8px; border-bottom:1px solid var(--border); vertical-align:middle; }
+  tr:last-child td{ border-bottom:none; }
+  .barra-mini{ height:6px; border-radius:4px; background:var(--vazio-bg); overflow:hidden; margin-top:4px; }
+  .barra-mini i{ display:block; height:100%; background:var(--vencido); }
+
+  .badge{ font-size:11px; font-weight:600; padding:3px 9px; border-radius:20px; white-space:nowrap; }
+
+  #toast{
+    position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(20px);
+    background:var(--charcoal); color:#fff; padding:10px 18px; border-radius:var(--radius);
+    font-size:13px; opacity:0; pointer-events:none; transition:all .25s ease;
+  }
+  #toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
+  .vazio-msg{ font-size:13px; color:var(--charcoal-2); }
+</style>
 </head>
-<body class="min-h-screen flex flex-col justify-between">
+<body>
+<div class="wrap">
 
-    <!-- MODAL DE LOGIN -->
-    <div id="loginModal" class="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 backdrop-blur-md">
-        <div class="glass-card p-8 rounded-2xl w-full max-w-md shadow-2xl border border-slate-700/50">
-            <div class="text-center mb-6">
-                <div class="w-16 h-16 bg-blue-600/20 text-blue-400 rounded-full flex items-center justify-center mx-auto mb-3 border border-blue-500/30">
-                    <i class="fa-solid fa-boxes-stacked text-2xl"></i>
-                </div>
-                <h2 class="text-2xl font-bold text-white">Controle de Estoque</h2>
-                <p class="text-xs text-slate-400 mt-1">Gestão e Validade de Produtos — Grupo Energia</p>
-            </div>
-            <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
-                <div>
-                    <label class="block text-xs font-medium text-slate-300 mb-1">Perfil de Acesso</label>
-                    <select id="userRole" class="w-full bg-slate-900/90 border border-slate-700 text-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
-                        <option value="viewer">Visualizador (Apenas Leitura)</option>
-                        <option value="admin">Administrador (Acesso Completo)</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-xs font-medium text-slate-300 mb-1">Senha de Acesso</label>
-                    <input type="password" id="userPass" class="w-full bg-slate-900/90 border border-slate-700 text-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-blue-500" placeholder="Digite sua senha" required>
-                </div>
-                <p id="loginError" class="text-red-400 text-xs hidden text-center"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Senha incorreta.</p>
-                <button type="submit" class="w-full py-2.5 bg-blue-600 hover:bg-blue-500 text-white font-semibold rounded-lg shadow-lg shadow-blue-600/30 transition-all text-sm">
-                    Entrar no Sistema
-                </button>
-            </form>
-        </div>
+  <header>
+    <div>
+      <h1>BI Almoxarifado — Controle FEFO</h1>
+      <p>Indicadores, tendência e prioridade de vencimento — Delaval</p>
     </div>
-
-    <!-- MAIN CONTENT -->
-    <div id="mainContent" class="hidden flex-1 flex flex-col">
-        <!-- TOP NAV -->
-        <header class="glass-card sticky top-0 z-40 border-b border-slate-800 px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
-            <div class="flex items-center gap-3">
-                <div class="p-2 bg-blue-600/20 text-blue-400 rounded-lg border border-blue-500/30">
-                    <i class="fa-solid fa-boxes-stacked text-xl"></i>
-                </div>
-                <div>
-                    <h1 class="text-lg font-bold text-white leading-tight">Controle de Vencimento de Produtos</h1>
-                    <p class="text-xs text-slate-400">SESMT / Logística — Grupo Energia</p>
-                </div>
-            </div>
-
-            <div class="flex items-center gap-3 w-full md:w-auto justify-end">
-                <button onclick="fetchData()" class="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-medium rounded-lg border border-slate-700 flex items-center gap-2 transition-all">
-                    <i class="fa-solid fa-rotate" id="refreshIcon"></i> Sincronizar
-                </button>
-                <a id="sheetLinkBtn" href="#" target="_blank" class="hidden px-3 py-1.5 bg-emerald-600/20 hover:bg-emerald-600/30 text-emerald-400 text-xs font-medium rounded-lg border border-emerald-500/30 flex items-center gap-2 transition-all">
-                    <i class="fa-solid fa-file-excel"></i> Editar Planilha
-                </a>
-                <span id="roleBadge" class="px-2.5 py-1 text-[11px] font-semibold rounded-full bg-slate-800 text-slate-300 border border-slate-700">
-                    Visualizador
-                </span>
-                <button onclick="logout()" class="p-2 text-slate-400 hover:text-red-400 transition-colors">
-                    <i class="fa-solid fa-right-from-bracket"></i>
-                </button>
-            </div>
-        </header>
-
-        <!-- CONTAINER -->
-        <main class="p-6 max-w-7xl mx-auto w-full space-y-6 flex-1">
-            
-            <!-- FILTROS -->
-            <section class="glass-card p-4 rounded-xl border border-slate-800 flex flex-wrap gap-4 items-center justify-between">
-                <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
-                    <!-- Busca Global -->
-                    <div class="relative flex-1 sm:w-64">
-                        <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-500 text-xs"></i>
-                        <input type="text" id="searchInput" oninput="applyFilters()" placeholder="Buscar por código, item ou lote..." class="w-full bg-slate-900 border border-slate-700 rounded-lg pl-8 pr-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
-                    </div>
-                    
-                    <!-- Filtro Filial -->
-                    <select id="filterFilial" onchange="applyFilters()" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
-                        <option value="">Todas as Filiais</option>
-                    </select>
-
-                    <!-- Filtro Status -->
-                    <select id="filterStatus" onchange="applyFilters()" class="bg-slate-900 border border-slate-700 rounded-lg px-3 py-1.5 text-xs text-slate-200 focus:outline-none focus:border-blue-500">
-                        <option value="">Todos os Status</option>
-                        <option value="VENCIDO">🔴 Vencidos</option>
-                        <option value="ALERTA">🟡 Alerta (≤ 60 Dias)</option>
-                        <option value="OK">🟢 OK (Em dia)</option>
-                    </select>
-                </div>
-
-                <div class="text-xs text-slate-400 flex items-center gap-2">
-                    <span>Exibindo: <strong id="itemsCount" class="text-slate-200">0</strong> de <strong id="totalCount" class="text-slate-200">0</strong> registros</span>
-                </div>
-            </section>
-
-            <!-- KPIS METRICS -->
-            <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                <!-- Vencidos -->
-                <div class="glass-card p-4 rounded-xl border border-red-500/20 bg-gradient-to-br from-red-500/10 via-transparent to-transparent">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-xs text-slate-400 font-medium">Produtos Vencidos</p>
-                            <h3 class="text-2xl font-bold text-red-400 mt-1" id="kpiVencidos">0</h3>
-                        </div>
-                        <div class="p-2 bg-red-500/20 text-red-400 rounded-lg border border-red-500/30">
-                            <i class="fa-solid fa-triangle-exclamation"></i>
-                        </div>
-                    </div>
-                    <p class="text-[11px] text-slate-500 mt-2">Ação imediata necessária</p>
-                </div>
-
-                <!-- Alerta 60 Dias -->
-                <div class="glass-card p-4 rounded-xl border border-amber-500/20 bg-gradient-to-br from-amber-500/10 via-transparent to-transparent">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-xs text-slate-400 font-medium">Alerta (≤ 60 Dias)</p>
-                            <h3 class="text-2xl font-bold text-amber-400 mt-1" id="kpiAlerta">0</h3>
-                        </div>
-                        <div class="p-2 bg-amber-500/20 text-amber-400 rounded-lg border border-amber-500/30">
-                            <i class="fa-solid fa-clock"></i>
-                        </div>
-                    </div>
-                    <p class="text-[11px] text-slate-500 mt-2">Próximos do vencimento</p>
-                </div>
-
-                <!-- Produtos OK -->
-                <div class="glass-card p-4 rounded-xl border border-emerald-500/20 bg-gradient-to-br from-emerald-500/10 via-transparent to-transparent">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-xs text-slate-400 font-medium">Produtos OK</p>
-                            <h3 class="text-2xl font-bold text-emerald-400 mt-1" id="kpiOK">0</h3>
-                        </div>
-                        <div class="p-2 bg-emerald-500/20 text-emerald-400 rounded-lg border border-emerald-500/30">
-                            <i class="fa-solid fa-circle-check"></i>
-                        </div>
-                    </div>
-                    <p class="text-[11px] text-slate-500 mt-2">Dentro do prazo seguro</p>
-                </div>
-
-                <!-- Total Estoque -->
-                <div class="glass-card p-4 rounded-xl border border-blue-500/20 bg-gradient-to-br from-blue-500/10 via-transparent to-transparent">
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <p class="text-xs text-slate-400 font-medium">Volume Total em Estoque</p>
-                            <h3 class="text-2xl font-bold text-blue-400 mt-1" id="kpiEstoque">0</h3>
-                        </div>
-                        <div class="p-2 bg-blue-500/20 text-blue-400 rounded-lg border border-blue-500/30">
-                            <i class="fa-solid fa-cubes"></i>
-                        </div>
-                    </div>
-                    <p class="text-[11px] text-slate-500 mt-2">Soma de itens armazenados</p>
-                </div>
-            </section>
-
-            <!-- CHARTS SECTION -->
-            <section class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <!-- Status por Filial -->
-                <div class="glass-card p-5 rounded-xl border border-slate-800">
-                    <h3 class="text-sm font-semibold text-white mb-4 flex items-center gap-2">
-                        <i class="fa-solid fa-chart-bar text-blue-400"></i> Distribuição por Filial
-                    </h3>
-                    <div class="relative h-64">
-                        <canvas id="chartFiliais"></canvas>
-                    </div>
-                </div>
-
-                <!-- Curva de Vencimentos -->
-                <div class="glass-card p-5 rounded-xl border border-slate-800">
-                    <h3 class="text-sm font-semibold text-white mb-4 flex items-center gap-2">
-                        <i class="fa-solid fa-chart-line text-amber-400"></i> Cronograma de Vencimentos (Próximos Meses)
-                    </h3>
-                    <div class="relative h-64">
-                        <canvas id="chartVencimentos"></canvas>
-                    </div>
-                </div>
-            </section>
-
-            <!-- TABELA DE DADOS -->
-            <section class="glass-card rounded-xl border border-slate-800 overflow-hidden">
-                <div class="p-4 border-b border-slate-800 flex justify-between items-center">
-                    <h3 class="text-sm font-semibold text-white flex items-center gap-2">
-                        <i class="fa-solid fa-list-check text-slate-400"></i> Relatório Detalhado de Produtos
-                    </h3>
-                </div>
-                <div class="overflow-x-auto custom-scrollbar">
-                    <table class="w-full text-left text-xs text-slate-300">
-                        <thead class="bg-slate-900/80 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
-                            <tr>
-                                <th class="p-3">Código</th>
-                                <th class="p-3">Descrição do Produto</th>
-                                <th class="p-3">Filial</th>
-                                <th class="p-3">Localização</th>
-                                <th class="p-3 text-right">Estoque</th>
-                                <th class="p-3">Lote</th>
-                                <th class="p-3">Fabricação</th>
-                                <th class="p-3">Vencimento</th>
-                                <th class="p-3 text-center">Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tableBody" class="divide-y divide-slate-800/50">
-                            <!-- Inserido dinamicamente via JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </section>
-        </main>
-
-        <!-- FOOTER -->
-        <footer class="p-4 text-center text-xs text-slate-500 border-t border-slate-900">
-            Grupo Energia &copy; 2026 — Sistema Interno de Controle de Validade
-        </footer>
+    <div id="statusBar">
+      <span id="ultimaAtualizacao">Carregando...</span>
+      <button id="btnAtualizar" type="button">Atualizar</button>
     </div>
+  </header>
 
-    <!-- JAVASCRIPT APP LOGIC -->
-    <script>
-        // CONFIGURAÇÕES GERAIS E SEGURANÇA COM LINKS DA PLANILHA
-        const CONFIG = {
-            csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ60OYXo06bh85ZAf1FdzyKpfjNEfu3jdssOdaniOzsIY1PnQgaViZA8DlI22DHeV4GBt8xCCMv9F0f/pub?gid=0&single=true&output=csv",
-            sheetDirectLink: "https://docs.google.com/spreadsheets/d/17I-QgOQjwGUtApTvaBX1mRHc8RBKnvHw6JxTnJK8_QU/edit?gid=0#gid=0",
-            passwords: {
-                viewer: "1234",
-                admin: "admin123"
-            }
-        };
+  <div class="filtros">
+    <select id="fFilial"></select>
+    <select id="fDep"></select>
+  </div>
 
-        let rawData = [];
-        let filteredData = [];
-        let chartFiliaisInstance = null;
-        let chartVencimentosInstance = null;
+  <div class="kpis" id="kpis"></div>
 
-        // AUTH & PERFIS
-        function handleLogin(e) {
-            e.preventDefault();
-            const role = document.getElementById('userRole').value;
-            const pass = document.getElementById('userPass').value;
-            const errorEl = document.getElementById('loginError');
+  <div class="grid2">
+    <section>
+      <h2>Distribuição de status</h2>
+      <p class="sub">Situação atual de todos os lotes filtrados</p>
+      <div class="chart-box"><canvas id="chartStatus"></canvas></div>
+    </section>
+    <section>
+      <h2>Vencimentos por mês</h2>
+      <p class="sub">Volume de lotes que vencem nos próximos 12 meses</p>
+      <div class="chart-box"><canvas id="chartMeses"></canvas></div>
+    </section>
+  </div>
 
-            if (pass === CONFIG.passwords[role]) {
-                localStorage.setItem('auth_role', role);
-                errorEl.classList.add('hidden');
-                initApp(role);
-            } else {
-                errorEl.classList.remove('hidden');
-            }
-        }
+  <section>
+    <h2>Evolução histórica</h2>
+    <p class="sub" id="subHistorico">Nº de lotes por status ao longo do tempo</p>
+    <div class="chart-box tall"><canvas id="chartHistorico"></canvas></div>
+  </section>
 
-        function logout() {
-            localStorage.removeItem('auth_role');
-            location.reload();
-        }
+  <div class="grid2">
+    <section>
+      <h2>Produtos mais críticos</h2>
+      <p class="sub">Ranking por lotes em alerta ou vencidos</p>
+      <table id="tabelaRanking"><thead><tr><th>Produto</th><th>Em risco</th></tr></thead><tbody></tbody></table>
+    </section>
+    <section>
+      <h2>Comparativo por filial</h2>
+      <p class="sub">Status dos lotes por filial</p>
+      <div class="chart-box"><canvas id="chartFilial"></canvas></div>
+    </section>
+  </div>
 
-        function checkAuth() {
-            const role = localStorage.getItem('auth_role');
-            if (role) {
-                initApp(role);
-            }
-        }
+</div>
 
-        function initApp(role) {
-            document.getElementById('loginModal').classList.add('hidden');
-            document.getElementById('mainContent').classList.remove('hidden');
-            
-            const badge = document.getElementById('roleBadge');
-            const sheetBtn = document.getElementById('sheetLinkBtn');
+<div id="toast"></div>
 
-            if (role === 'admin') {
-                badge.textContent = 'Administrador';
-                badge.className = 'px-2.5 py-1 text-[11px] font-semibold rounded-full bg-blue-600/20 text-blue-400 border border-blue-500/30';
-                sheetBtn.href = CONFIG.sheetDirectLink;
-                sheetBtn.classList.remove('hidden');
-            } else {
-                badge.textContent = 'Visualizador';
-                badge.className = 'px-2.5 py-1 text-[11px] font-semibold rounded-full bg-slate-800 text-slate-300 border border-slate-700';
-                sheetBtn.classList.add('hidden');
-            }
+<script>
+/* ============================================================
+   CONFIGURAÇÃO — cole aqui a URL do Web App do Apps Script
+   ============================================================ */
+var GAS_URL = 'COLE_AQUI_A_URL_DO_WEB_APP';
+var AUTO_REFRESH_MINUTOS = 5;
 
-            fetchData();
-        }
+var CORES = {
+  OK: '#4C8A2C', ALERTA: '#C88A1E', VENCIDO: '#B6392F', VAZIO: '#8A887F', ORANGE: '#DF7F24'
+};
 
-        // CARREGAMENTO DE DADOS (PAPAPARSE)
-        function fetchData() {
-            const icon = document.getElementById('refreshIcon');
-            if(icon) icon.classList.add('fa-spin');
+var DADOS = { itens: [], historico: [] };
+var graficos = {};
 
-            Papa.parse(CONFIG.csvUrl, {
-                download: true,
-                header: true,
-                skipEmptyLines: true,
-                complete: function(results) {
-                    if(icon) icon.classList.remove('fa-spin');
-                    processData(results.data);
-                },
-                error: function(err) {
-                    if(icon) icon.classList.remove('fa-spin');
-                    alert("Erro ao sincronizar com o Google Sheets. Verifique a conexão com a planilha.");
-                }
-            });
-        }
+function toast(msg){
+  var el = document.getElementById('toast');
+  el.textContent = msg;
+  el.classList.add('show');
+  setTimeout(function(){ el.classList.remove('show'); }, 3000);
+}
 
-        // PROCESSAMENTO DE DADOS
-        function processData(data) {
-            rawData = data.map((row, index) => {
-                const estoqueVal = parseFloat((row['ESTOQUE'] || '0').replace(',', '.')) || 0;
-                const statusCalculado = calculateStatus(row['VENCIMENTO'], row['VENCIMENTO (STATUS)']);
+function uniq(arr){
+  var s = {};
+  arr.forEach(function(v){ if (v) s[v] = true; });
+  return Object.keys(s).sort();
+}
 
-                return {
-                    id: index,
-                    codigo: row['CÓDIGO'] || 'N/A',
-                    descricao: row['DESCRIÇÃO DO PRODUTO'] || 'Sem Descrição',
-                    filial: row['FILIAL'] || 'Não Definida',
-                    localizacao: row['LOCALIZAÇÃO'] || '-',
-                    estoque: estoqueVal,
-                    lote: row['LOTE'] || '-',
-                    fabricacao: row['FAB'] || '-',
-                    vencimento: row['VENCIMENTO'] || '-',
-                    status: statusCalculado
-                };
-            });
+function preencherSelect(id, labelPadrao, opcoes){
+  var el = document.getElementById(id);
+  el.innerHTML = '<option value="">' + labelPadrao + '</option>' +
+    opcoes.map(function(o){ return '<option value="' + o + '">' + o + '</option>'; }).join('');
+}
 
-            populateDropdowns();
-            applyFilters();
-        }
+function carregar(forcar){
+  if (GAS_URL.indexOf('COLE_AQUI') === 0) {
+    toast('Configure a variável GAS_URL no topo do script.');
+    document.getElementById('ultimaAtualizacao').textContent = 'URL do backend não configurada';
+    return;
+  }
+  fetch(GAS_URL + (forcar ? '?forcar=1' : ''))
+    .then(function(r){ return r.json(); })
+    .then(function(json){
+      if (json.erro) { toast('Erro: ' + json.mensagem); return; }
+      DADOS.itens = json.itens;
+      DADOS.historico = json.historico || [];
+      montarFiltros();
+      renderizarTudo();
+      var dt = new Date(json.geradoEm);
+      document.getElementById('ultimaAtualizacao').textContent =
+        'Atualizado às ' + dt.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+    })
+    .catch(function(){
+      toast('Não foi possível carregar os dados.');
+      document.getElementById('ultimaAtualizacao').textContent = 'Falha ao atualizar';
+    });
+}
 
-        // CÁLCULO DE STATUS BASEADO NA DATA DE VENCIMENTO
-        function calculateStatus(dataVenc, statusPlanilha) {
-            if (statusPlanilha) {
-                const upper = statusPlanilha.toUpperCase();
-                if (upper.includes('VENCIDO')) return 'VENCIDO';
-                if (upper.includes('ALERTA') || upper.includes('60')) return 'ALERTA';
-                if (upper.includes('OK')) return 'OK';
-            }
+function montarFiltros(){
+  preencherSelect('fFilial', 'Todas as filiais', uniq(DADOS.itens.map(function(r){ return r.filial; })));
+  preencherSelect('fDep', 'Todos os depósitos', uniq(DADOS.itens.map(function(r){ return r.dep; })));
+}
 
-            if (!dataVenc || dataVenc === '-') return 'OK';
+function getFiltrado(){
+  var filial = document.getElementById('fFilial').value;
+  var dep = document.getElementById('fDep').value;
+  return DADOS.itens.filter(function(r){
+    if (filial && r.filial !== filial) return false;
+    if (dep && r.dep !== dep) return false;
+    return true;
+  });
+}
 
-            // Tratamento de data PT-BR (DD/MM/YYYY)
-            const parts = dataVenc.split('/');
-            if (parts.length === 3) {
-                const vencDate = new Date(parts[2], parts[1] - 1, parts[0]);
-                const hoje = new Date();
-                const diffTime = vencDate - hoje;
-                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+function diasPara(dataStr){
+  if (!dataStr) return null;
+  var hoje = new Date(); hoje.setHours(0,0,0,0);
+  var d = new Date(dataStr + 'T00:00:00');
+  return Math.round((d - hoje) / 86400000);
+}
 
-                if (diffDays < 0) return 'VENCIDO';
-                if (diffDays <= 60) return 'ALERTA';
-                return 'OK';
-            }
+// ---------- KPIs ----------
+function renderKPIs(dados){
+  var total = dados.length;
+  var ok = dados.filter(function(r){ return r.status === 'OK'; }).length;
+  var alerta = dados.filter(function(r){ return r.status === 'ALERTA'; }).length;
+  var vencido = dados.filter(function(r){ return r.status === 'VENCIDO'; }).length;
+  var vencendo30 = dados.filter(function(r){ var d = diasPara(r.venc); return d !== null && d >= 0 && d <= 30; }).length;
+  var pctRisco = total ? Math.round(((alerta + vencido) / total) * 100) : 0;
 
-            return 'OK';
-        }
+  var cartoes = [
+    { label:'Total de lotes', valor:total, sub:'endereços com produto' },
+    { label:'Em risco (alerta + vencido)', valor:pctRisco + '%', sub:(alerta+vencido)+' de '+total+' lotes' },
+    { label:'Vencidos agora', valor:vencido, sub:'ação imediata' },
+    { label:'Vencendo em 30 dias', valor:vencendo30, sub:'planejar saída' }
+  ];
 
-        // POPULAR FILTROS
-        function populateDropdowns() {
-            const filiais = [...new Set(rawData.map(item => item.filial))].sort();
-            const select = document.getElementById('filterFilial');
-            select.innerHTML = '<option value="">Todas as Filiais</option>';
-            filiais.forEach(f => {
-                select.innerHTML += `<option value="${f}">${f}</option>`;
-            });
-        }
+  document.getElementById('kpis').innerHTML = cartoes.map(function(c){
+    return '<div class="kpi"><span>' + c.label + '</span><strong>' + c.valor + '</strong><small>' + c.sub + '</small></div>';
+  }).join('');
+}
 
-        // APLICAÇÃO DE FILTROS
-        function applyFilters() {
-            const search = document.getElementById('searchInput').value.toLowerCase();
-            const filial = document.getElementById('filterFilial').value;
-            const status = document.getElementById('filterStatus').value;
+// ---------- Gráfico: distribuição de status (donut) ----------
+function renderChartStatus(dados){
+  var contagem = { OK:0, ALERTA:0, VENCIDO:0, VAZIO:0 };
+  dados.forEach(function(r){ contagem[r.status] = (contagem[r.status]||0) + 1; });
 
-            filteredData = rawData.filter(item => {
-                const matchSearch = item.codigo.toLowerCase().includes(search) || 
-                                    item.descricao.toLowerCase().includes(search) || 
-                                    item.lote.toLowerCase().includes(search);
-                const matchFilial = !filial || item.filial === filial;
-                const matchStatus = !status || item.status === status;
+  var ctx = document.getElementById('chartStatus');
+  if (graficos.status) graficos.status.destroy();
+  graficos.status = new Chart(ctx, {
+    type: 'doughnut',
+    data: {
+      labels: ['OK', 'Alerta', 'Vencido', 'Vazio'],
+      datasets: [{
+        data: [contagem.OK, contagem.ALERTA, contagem.VENCIDO, contagem.VAZIO],
+        backgroundColor: [CORES.OK, CORES.ALERTA, CORES.VENCIDO, CORES.VAZIO],
+        borderWidth: 0
+      }]
+    },
+    options: {
+      maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 12 } } } }
+    }
+  });
+}
 
-                return matchSearch && matchFilial && matchStatus;
-            });
+// ---------- Gráfico: vencimentos por mês (próximos 12 meses) ----------
+function renderChartMeses(dados){
+  var hoje = new Date(); hoje.setDate(1); hoje.setHours(0,0,0,0);
+  var meses = [];
+  var labels = [];
+  for (var i = 0; i < 12; i++) {
+    var d = new Date(hoje.getFullYear(), hoje.getMonth() + i, 1);
+    meses.push(d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0'));
+    labels.push(d.toLocaleDateString('pt-BR', { month:'short', year:'2-digit' }));
+  }
 
-            updateUI();
-        }
+  var contagem = {};
+  meses.forEach(function(m){ contagem[m] = 0; });
+  dados.forEach(function(r){
+    if (!r.venc) return;
+    var chave = r.venc.slice(0,7);
+    if (contagem[chave] !== undefined) contagem[chave]++;
+  });
 
-        // ATUALIZAÇÃO DA INTERFACE
-        function updateUI() {
-            document.getElementById('itemsCount').textContent = filteredData.length;
-            document.getElementById('totalCount').textContent = rawData.length;
+  var ctx = document.getElementById('chartMeses');
+  if (graficos.meses) graficos.meses.destroy();
+  graficos.meses = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: labels,
+      datasets: [{ data: meses.map(function(m){ return contagem[m]; }), backgroundColor: CORES.ORANGE, borderRadius: 4 }]
+    },
+    options: {
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+    }
+  });
+}
 
-            updateKPIs();
-            renderTable();
-            renderCharts();
-        }
+// ---------- Gráfico: evolução histórica ----------
+function renderChartHistorico(){
+  var hist = DADOS.historico;
+  var ctx = document.getElementById('chartHistorico');
 
-        // REGRAS DOS KPIS
-        function updateKPIs() {
-            let vencidos = 0, alerta = 0, ok = 0, totalEstoque = 0;
+  if (!hist || hist.length < 2) {
+    document.getElementById('subHistorico').textContent =
+      'Ainda coletando dados — o histórico é registrado automaticamente 1x por dia. Volte em alguns dias para ver a tendência.';
+    if (graficos.historico) { graficos.historico.destroy(); graficos.historico = null; }
+    return;
+  }
+  document.getElementById('subHistorico').textContent = 'Nº de lotes por status ao longo do tempo';
 
-            filteredData.forEach(item => {
-                if (item.status === 'VENCIDO') vencidos++;
-                else if (item.status === 'ALERTA') alerta++;
-                else ok++;
+  var labels = hist.map(function(h){ return h.data.split('-').reverse().join('/'); });
+  if (graficos.historico) graficos.historico.destroy();
+  graficos.historico = new Chart(ctx, {
+    type: 'line',
+    data: {
+      labels: labels,
+      datasets: [
+        { label:'OK', data: hist.map(function(h){return h.ok;}), borderColor: CORES.OK, backgroundColor: CORES.OK, tension:.3 },
+        { label:'Alerta', data: hist.map(function(h){return h.alerta;}), borderColor: CORES.ALERTA, backgroundColor: CORES.ALERTA, tension:.3 },
+        { label:'Vencido', data: hist.map(function(h){return h.vencido;}), borderColor: CORES.VENCIDO, backgroundColor: CORES.VENCIDO, tension:.3 }
+      ]
+    },
+    options: {
+      maintainAspectRatio: false,
+      plugins: { legend: { position:'bottom', labels:{ font:{family:'Inter', size:12} } } },
+      scales: { y: { beginAtZero:true, ticks:{ precision:0 } } }
+    }
+  });
+}
 
-                totalEstoque += item.estoque;
-            });
+// ---------- Ranking de produtos críticos ----------
+function renderRanking(dados){
+  var mapa = {};
+  dados.forEach(function(r){
+    if (r.status !== 'ALERTA' && r.status !== 'VENCIDO') return;
+    var chave = r.produto || 'Sem descrição';
+    mapa[chave] = (mapa[chave] || 0) + 1;
+  });
+  var lista = Object.keys(mapa).map(function(k){ return { produto:k, qtd:mapa[k] }; });
+  lista.sort(function(a,b){ return b.qtd - a.qtd; });
+  lista = lista.slice(0, 8);
 
-            document.getElementById('kpiVencidos').textContent = vencidos;
-            document.getElementById('kpiAlerta').textContent = alerta;
-            document.getElementById('kpiOK').textContent = ok;
-            document.getElementById('kpiEstoque').textContent = totalEstoque.toLocaleString('pt-BR');
-        }
+  var max = lista.length ? lista[0].qtd : 1;
+  var tbody = document.querySelector('#tabelaRanking tbody');
+  if (!lista.length) {
+    tbody.innerHTML = '<tr><td colspan="2" class="vazio-msg">Nenhum produto em risco nos filtros atuais.</td></tr>';
+    return;
+  }
+  tbody.innerHTML = lista.map(function(l){
+    var pct = Math.round((l.qtd / max) * 100);
+    return '<tr><td>' + l.produto + '<div class="barra-mini"><i style="width:' + pct + '%"></i></div></td><td>' + l.qtd + '</td></tr>';
+  }).join('');
+}
 
-        // RENDERIZAÇÃO DA TABELA
-        function renderTable() {
-            const tbody = document.getElementById('tableBody');
-            tbody.innerHTML = '';
+// ---------- Comparativo por filial ----------
+function renderChartFilial(dados){
+  var filiais = uniq(dados.map(function(r){ return r.filial; }));
+  var porFilial = {};
+  filiais.forEach(function(f){ porFilial[f] = { OK:0, ALERTA:0, VENCIDO:0, VAZIO:0 }; });
+  dados.forEach(function(r){
+    if (!r.filial) return;
+    porFilial[r.filial][r.status] = (porFilial[r.filial][r.status] || 0) + 1;
+  });
 
-            if (filteredData.length === 0) {
-                tbody.innerHTML = `<tr><td colspan="9" class="p-6 text-center text-slate-500">Nenhum produto encontrado.</td></tr>`;
-                return;
-            }
+  var ctx = document.getElementById('chartFilial');
+  if (graficos.filial) graficos.filial.destroy();
+  graficos.filial = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: filiais,
+      datasets: [
+        { label:'OK', data: filiais.map(function(f){return porFilial[f].OK;}), backgroundColor: CORES.OK },
+        { label:'Alerta', data: filiais.map(function(f){return porFilial[f].ALERTA;}), backgroundColor: CORES.ALERTA },
+        { label:'Vencido', data: filiais.map(function(f){return porFilial[f].VENCIDO;}), backgroundColor: CORES.VENCIDO }
+      ]
+    },
+    options: {
+      maintainAspectRatio: false,
+      plugins: { legend: { position:'bottom', labels:{ font:{family:'Inter', size:12} } } },
+      scales: { x: { stacked:true }, y: { stacked:true, beginAtZero:true, ticks:{ precision:0 } } }
+    }
+  });
+}
 
-            filteredData.forEach(item => {
-                let badgeClass = '';
-                let badgeText = item.status;
+function renderizarTudo(){
+  var dados = getFiltrado();
+  renderKPIs(dados);
+  renderChartStatus(dados);
+  renderChartMeses(dados);
+  renderChartHistorico();
+  renderRanking(dados);
+  renderChartFilial(dados);
+}
 
-                if (item.status === 'VENCIDO') {
-                    badgeClass = 'bg-red-500/20 text-red-400 border-red-500/30';
-                } else if (item.status === 'ALERTA') {
-                    badgeClass = 'bg-amber-500/20 text-amber-400 border-amber-500/30';
-                } else {
-                    badgeClass = 'bg-emerald-500/20 text-emerald-400 border-emerald-500/30';
-                }
+['fFilial', 'fDep'].forEach(function(id){
+  document.getElementById(id).addEventListener('change', renderizarTudo);
+});
+document.getElementById('btnAtualizar').addEventListener('click', function(){ carregar(true); });
 
-                tbody.innerHTML += `
-                    <tr class="hover:bg-slate-800/40 transition-colors">
-                        <td class="p-3 font-mono font-medium text-slate-200">${item.codigo}</td>
-                        <td class="p-3 font-medium text-slate-100">${item.descricao}</td>
-                        <td class="p-3">${item.filial}</td>
-                        <td class="p-3 text-slate-400">${item.localizacao}</td>
-                        <td class="p-3 text-right font-semibold text-slate-200">${item.estoque.toLocaleString('pt-BR')}</td>
-                        <td class="p-3 font-mono text-slate-400">${item.lote}</td>
-                        <td class="p-3 text-slate-400">${item.fabricacao}</td>
-                        <td class="p-3 font-medium text-slate-200">${item.vencimento}</td>
-                        <td class="p-3 text-center">
-                            <span class="px-2 py-0.5 text-[10px] font-bold rounded-full border ${badgeClass}">
-                                ${badgeText}
-                            </span>
-                        </td>
-                    </tr>
-                `;
-            });
-        }
-
-        // GRÁFICOS INTERATIVOS
-        function renderCharts() {
-            // Chart 1: Status por Filial
-            const filiaisList = [...new Set(filteredData.map(i => i.filial))];
-            const dataVencidos = filiaisList.map(f => filteredData.filter(i => i.filial === f && i.status === 'VENCIDO').length);
-            const dataAlerta = filiaisList.map(f => filteredData.filter(i => i.filial === f && i.status === 'ALERTA').length);
-            const dataOK = filiaisList.map(f => filteredData.filter(i => i.filial === f && i.status === 'OK').length);
-
-            if (chartFiliaisInstance) chartFiliaisInstance.destroy();
-            const ctx1 = document.getElementById('chartFiliais').getContext('2d');
-            chartFiliaisInstance = new Chart(ctx1, {
-                type: 'bar',
-                data: {
-                    labels: filiaisList,
-                    datasets: [
-                        { label: 'Vencidos', data: dataVencidos, backgroundColor: '#ef4444' },
-                        { label: 'Alerta', data: dataAlerta, backgroundColor: '#f59e0b' },
-                        { label: 'OK', data: dataOK, backgroundColor: '#10b981' }
-                    ]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { labels: { color: '#94a3b8' } } },
-                    scales: {
-                        x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                        y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.05)' } }
-                    }
-                }
-            });
-
-            // Chart 2: Cronograma Mensal de Vencimentos
-            const monthsMap = {};
-            filteredData.forEach(item => {
-                if(item.vencimento && item.vencimento.includes('/')) {
-                    const parts = item.vencimento.split('/');
-                    if(parts.length === 3) {
-                        const key = `${parts[1]}/${parts[2]}`;
-                        monthsMap[key] = (monthsMap[key] || 0) + 1;
-                    }
-                }
-            });
-
-            const monthLabels = Object.keys(monthsMap).slice(0, 8);
-            const monthCounts = monthLabels.map(m => monthsMap[m]);
-
-            if (chartVencimentosInstance) chartVencimentosInstance.destroy();
-            const ctx2 = document.getElementById('chartVencimentos').getContext('2d');
-            chartVencimentosInstance = new Chart(ctx2, {
-                type: 'line',
-                data: {
-                    labels: monthLabels,
-                    datasets: [{
-                        label: 'Produtos a Vencer',
-                        data: monthCounts,
-                        borderColor: '#3b82f6',
-                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                        fill: true,
-                        tension: 0.3
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { labels: { color: '#94a3b8' } } },
-                    scales: {
-                        x: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.05)' } },
-                        y: { ticks: { color: '#94a3b8' }, grid: { color: 'rgba(255,255,255,0.05)' } }
-                    }
-                }
-            });
-        }
-
-        // INICIALIZAÇÃO
-        window.onload = checkAuth;
-    </script>
+carregar(false);
+if (AUTO_REFRESH_MINUTOS > 0){
+  setInterval(function(){ carregar(false); }, AUTO_REFRESH_MINUTOS * 60 * 1000);
+}
+</script>
 </body>
 </html>

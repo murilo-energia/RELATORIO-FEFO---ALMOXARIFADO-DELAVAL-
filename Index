@@ -50,7 +50,7 @@
                     <i class="fa-solid fa-boxes-stacked text-2xl"></i>
                 </div>
                 <h2 class="text-2xl font-bold text-white">Controle de Estoque</h2>
-                <p class="text-xs text-slate-400 mt-1">Gestão e Validade de Produtos</p>
+                <p class="text-xs text-slate-400 mt-1">Gestão e Validade de Produtos — Grupo Energia</p>
             </div>
             <form id="loginForm" onsubmit="handleLogin(event)" class="space-y-4">
                 <div>
@@ -253,12 +253,10 @@
 
     <!-- JAVASCRIPT APP LOGIC -->
     <script>
-        // CONFIGURAÇÕES GERAIS E SEGURANÇA
+        // CONFIGURAÇÕES GERAIS E SEGURANÇA COM LINKS DA PLANILHA
         const CONFIG = {
-            // URL do CSV Publicado da Planilha Google Sheets
-            csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vT5K76P3W0YlR7c8T4Q9Z7-YOUR-PUBLISHED-CSV-URL/pub?output=csv",
-            // Link direto para edição da planilha (visível apenas para Administrador)
-            sheetDirectLink: "https://docs.google.com/spreadsheets/d/YOUR-SPREADSHEET-ID/edit",
+            csvUrl: "https://docs.google.com/spreadsheets/d/e/2PACX-1vQ60OYXo06bh85ZAf1FdzyKpfjNEfu3jdssOdaniOzsIY1PnQgaViZA8DlI22DHeV4GBt8xCCMv9F0f/pub?gid=0&single=true&output=csv",
+            sheetDirectLink: "https://docs.google.com/spreadsheets/d/17I-QgOQjwGUtApTvaBX1mRHc8RBKnvHw6JxTnJK8_QU/edit?gid=0#gid=0",
             passwords: {
                 viewer: "1234",
                 admin: "admin123"
@@ -334,7 +332,7 @@
                 },
                 error: function(err) {
                     if(icon) icon.classList.remove('fa-spin');
-                    alert("Erro ao sincronizar com o Google Sheets. Verifique o link público CSV.");
+                    alert("Erro ao sincronizar com o Google Sheets. Verifique a conexão com a planilha.");
                 }
             });
         }

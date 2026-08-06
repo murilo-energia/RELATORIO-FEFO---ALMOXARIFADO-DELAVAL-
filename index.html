@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Almoxarifado FEFO — Grupo Energia</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
 <style>
   :root{
-    --orange:#DF7F24; --orange-dark:#C56A16;
-    --charcoal:#252525; --charcoal-2:#55534D;
-    --bg:#FAF7F2; --card:#FFFFFF; --border:#E8E2D8;
+    --orange:#DF7F24; --orange-dark:#C56A16; --orange-light:#F3AD68;
+    --charcoal:#252525; --charcoal-2:#5B584F;
+    --bg:#FAF7F2; --card:#FFFFFF; --border:#E9E3D8;
     --ok:#4C8A2C; --ok-bg:#EAF3DE;
     --alerta:#C88A1E; --alerta-bg:#FCEFD9;
     --vencido:#B6392F; --vencido-bg:#FBE7E5;
@@ -19,27 +19,32 @@
     --radius:10px;
   }
   *{ box-sizing:border-box; }
-  body{ margin:0; background:var(--bg); color:var(--charcoal); font-family:'Inter',sans-serif; padding:24px 16px 64px; }
-  .wrap{ max-width:1000px; margin:0 auto; }
+  body{ margin:0; background:var(--bg); color:var(--charcoal); font-family:'Inter',sans-serif; padding:0 0 64px; }
+  .topo{ background:var(--charcoal); padding:18px 16px; }
+  .topo .wrap{ display:flex; align-items:center; gap:14px; }
+  .topo img{ height:38px; width:auto; display:block; }
+  .topo .titulos h1{ font-family:'Manrope',sans-serif; font-weight:700; font-size:19px; margin:0; color:#fff; }
+  .topo .titulos p{ margin:2px 0 0; font-size:12px; color:#C9C6BC; }
+  .topo .faixa{ height:3px; background:linear-gradient(90deg, var(--orange), var(--orange-light)); margin-top:18px; }
 
-  header{ display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:18px; }
-  header h1{ font-family:'Manrope',sans-serif; font-weight:700; font-size:21px; margin:0 0 4px; }
-  header p{ margin:0; font-size:13px; color:var(--charcoal-2); }
+  .wrap{ max-width:1020px; margin:0 auto; padding:0 16px; }
+  .conteudo{ padding-top:20px; }
+
+  .barra-acoes{ display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:16px; }
   #statusBar{ font-size:12px; color:var(--charcoal-2); display:flex; align-items:center; gap:8px; }
-  #statusBar button{ font-family:'Inter',sans-serif; font-size:12px; padding:6px 12px; border-radius:var(--radius); border:1px solid var(--border); background:#fff; cursor:pointer; color:var(--charcoal); }
+  #statusBar button{ font-family:'Inter',sans-serif; font-size:12px; padding:7px 14px; border-radius:var(--radius); border:1px solid var(--border); background:#fff; cursor:pointer; color:var(--charcoal); font-weight:500; }
   #statusBar button:hover{ border-color:var(--orange); color:var(--orange-dark); }
 
   .kpis{ display:grid; grid-template-columns:repeat(auto-fit, minmax(150px,1fr)); gap:12px; margin-bottom:18px; }
   .kpi{ background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px; border-left:3px solid var(--orange); }
   .kpi span{ display:block; font-size:12px; color:var(--charcoal-2); margin-bottom:4px; }
-  .kpi strong{ font-family:'Manrope',sans-serif; font-size:24px; font-weight:700; }
+  .kpi strong{ font-family:'Manrope',sans-serif; font-size:26px; font-weight:800; }
+  .kpi.ok{ border-left-color:var(--ok); } .kpi.ok strong{ color:var(--ok); }
+  .kpi.alerta{ border-left-color:var(--alerta); } .kpi.alerta strong{ color:var(--alerta); }
+  .kpi.vencido{ border-left-color:var(--vencido); } .kpi.vencido strong{ color:var(--vencido); }
 
   nav.menu{ display:flex; gap:6px; margin-bottom:16px; border-bottom:1px solid var(--border); }
-  nav.menu button{
-    font-family:'Inter',sans-serif; font-size:13px; font-weight:500; padding:10px 16px;
-    border:none; background:transparent; color:var(--charcoal-2); cursor:pointer;
-    border-bottom:2px solid transparent; margin-bottom:-1px;
-  }
+  nav.menu button{ font-family:'Inter',sans-serif; font-size:13px; font-weight:600; padding:10px 16px; border:none; background:transparent; color:var(--charcoal-2); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; }
   nav.menu button.ativo{ color:var(--orange-dark); border-bottom-color:var(--orange); }
 
   .painel{ display:none; }
@@ -51,20 +56,23 @@
   .filtros input{ flex:2; min-width:180px; }
 
   section{ background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; margin-bottom:16px; }
-  section h2{ font-family:'Manrope',sans-serif; font-size:14px; font-weight:600; margin:0 0 12px; }
+  section h2{ font-family:'Manrope',sans-serif; font-size:14px; font-weight:700; margin:0 0 12px; }
 
   table{ width:100%; border-collapse:collapse; font-size:13px; }
-  th{ text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.02em; color:var(--charcoal-2); font-weight:600; padding:0 8px 8px; border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--card); }
+  th{ text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.02em; color:var(--charcoal-2); font-weight:700; padding:0 8px 8px; border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--card); }
   td{ padding:9px 8px; border-bottom:1px solid var(--border); vertical-align:middle; white-space:nowrap; }
   td.produto{ white-space:normal; }
   tr:last-child td{ border-bottom:none; }
+  tr:hover td{ background:#FBF9F5; }
   .tabela-scroll{ max-height:520px; overflow:auto; }
 
-  .badge{ font-size:11px; font-weight:600; padding:3px 9px; border-radius:20px; white-space:nowrap; display:inline-block; }
+  .badge{ font-size:11px; font-weight:700; padding:3px 9px; border-radius:20px; white-space:nowrap; display:inline-block; }
 
   .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-  @media (max-width:720px){ .grid2{ grid-template-columns:1fr; } }
+  @media (max-width:720px){ .grid2{ grid-template-columns:1fr; } .topo .titulos p{ display:none; } }
   .chart-box{ position:relative; height:260px; }
+
+  footer{ text-align:center; font-size:11px; color:var(--charcoal-2); margin-top:8px; }
 
   #toast{ position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--charcoal); color:#fff; padding:10px 18px; border-radius:var(--radius); font-size:13px; opacity:0; pointer-events:none; transition:all .25s ease; }
   #toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
@@ -72,18 +80,26 @@
 </style>
 </head>
 <body>
-<div class="wrap">
 
-  <header>
-    <div>
+<div class="topo">
+  <div class="wrap">
+    <img src="logo.png" alt="Grupo Energia">
+    <div class="titulos">
       <h1>Almoxarifado FEFO — Delaval</h1>
       <p>Controle de lotes e vencimentos</p>
     </div>
+  </div>
+</div>
+<div class="faixa"></div>
+
+<div class="wrap conteudo">
+
+  <div class="barra-acoes">
     <div id="statusBar">
       <span id="ultimaAtualizacao">Carregando...</span>
       <button id="btnAtualizar" type="button">Atualizar</button>
     </div>
-  </header>
+  </div>
 
   <div class="kpis" id="kpis"></div>
 
@@ -98,15 +114,15 @@
       <select id="fFilial"></select>
       <select id="fDep"></select>
       <select id="fStatus"></select>
-      <input id="fBusca" type="text" placeholder="Buscar produto ou lote">
+      <input id="fBusca" type="text" placeholder="Buscar produto, lote ou código">
     </div>
     <section>
       <div class="tabela-scroll">
         <table id="tabelaLotes">
           <thead>
             <tr>
-              <th>Status</th><th>Produto</th><th>Filial</th><th>Localização</th>
-              <th>Lote</th><th>Vencimento</th><th>Dias</th>
+              <th>Status</th><th>Código</th><th>Produto</th><th>Filial</th><th>Localização</th>
+              <th>Lote</th><th>Estoque</th><th>Fabricação</th><th>Vencimento</th><th>Dias</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -129,15 +145,17 @@
     </div>
   </div>
 
+  <footer>Desenvolvido por Murilo Henrique Roberto — Grupo Energia</footer>
+
 </div>
 
 <div id="toast"></div>
 
 <script>
 /* ============================================================
-   CONFIGURAÇÃO — cole aqui a URL do Web App do Apps Script
+   CONFIGURAÇÃO
    ============================================================ */
-var GAS_URL = 'https://script.google.com/macros/s/AKfycbxX1a2b3c4d5e6f7g8h9i0jkLlMmNnOoPpQqRrSsTtUvW/exec';
+var GAS_URL = 'https://script.google.com/macros/s/AKfycbzt9PBe2bDZDVdgy4DJDcG3xae_cECczmy1tCK_njER36MJln_qapwdrLuAXywiKCKm/exec';
 var AUTO_REFRESH_MINUTOS = 5;
 
 var STATUS_META = {
@@ -155,7 +173,7 @@ function toast(msg){
   var el = document.getElementById('toast');
   el.textContent = msg;
   el.classList.add('show');
-  setTimeout(function(){ el.classList.remove('show'); }, 3000);
+  setTimeout(function(){ el.classList.remove('show'); }, 4000);
 }
 
 function uniq(arr){
@@ -182,24 +200,24 @@ function diasPara(dataStr){
 
 // ---------- Carregamento ----------
 function carregar(forcar){
-  if (GAS_URL.indexOf('COLE_AQUI') === 0) {
-    toast('Configure a variável GAS_URL no topo do script.');
-    document.getElementById('ultimaAtualizacao').textContent = 'URL do backend não configurada';
-    return;
-  }
+  document.getElementById('ultimaAtualizacao').textContent = 'Carregando...';
   fetch(GAS_URL + (forcar ? '?forcar=1' : ''))
-    .then(function(r){ return r.json(); })
+    .then(function(r){
+      if (!r.ok) throw new Error('HTTP ' + r.status);
+      return r.json();
+    })
     .then(function(json){
-      if (json.erro) { toast('Erro: ' + json.mensagem); return; }
-      DADOS = json.itens;
+      if (json.erro) { toast('Erro no backend: ' + json.mensagem); document.getElementById('ultimaAtualizacao').textContent = 'Erro ao carregar'; return; }
+      DADOS = json.itens || [];
+      if (!DADOS.length) toast('A planilha respondeu, mas nenhum lote foi encontrado.');
       montarFiltros();
       renderizarTudo();
       var dt = new Date(json.geradoEm);
       document.getElementById('ultimaAtualizacao').textContent =
         'Atualizado às ' + dt.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
     })
-    .catch(function(){
-      toast('Não foi possível carregar os dados.');
+    .catch(function(err){
+      toast('Não foi possível conectar ao backend (' + err.message + ').');
       document.getElementById('ultimaAtualizacao').textContent = 'Falha ao atualizar';
     });
 }
@@ -220,14 +238,14 @@ function getFiltrado(){
     if (dep && r.dep !== dep) return false;
     if (status && r.status !== status) return false;
     if (busca){
-      var alvo = ((r.produto||'') + ' ' + (r.lote||'')).toLowerCase();
+      var alvo = ((r.produto||'') + ' ' + (r.lote||'') + ' ' + (r.codigo||'')).toLowerCase();
       if (alvo.indexOf(busca) === -1) return false;
     }
     return true;
   });
 }
 
-// ---------- KPIs (compartilhados pelos dois painéis) ----------
+// ---------- KPIs ----------
 function renderKPIs(dados){
   var total = dados.length;
   var ok = dados.filter(function(r){ return r.status==='OK'; }).length;
@@ -235,13 +253,13 @@ function renderKPIs(dados){
   var vencido = dados.filter(function(r){ return r.status==='VENCIDO'; }).length;
 
   var cartoes = [
-    { label:'Total de lotes', valor: total },
-    { label:'OK', valor: ok },
-    { label:'Alerta', valor: alerta },
-    { label:'Vencido', valor: vencido }
+    { classe:'', label:'Total de lotes', valor: total },
+    { classe:'ok', label:'OK', valor: ok },
+    { classe:'alerta', label:'Alerta', valor: alerta },
+    { classe:'vencido', label:'Vencido', valor: vencido }
   ];
   document.getElementById('kpis').innerHTML = cartoes.map(function(c){
-    return '<div class="kpi"><span>' + c.label + '</span><strong>' + c.valor + '</strong></div>';
+    return '<div class="kpi ' + c.classe + '"><span>' + c.label + '</span><strong>' + c.valor + '</strong></div>';
   }).join('');
 }
 
@@ -255,21 +273,25 @@ function renderTabela(dados){
 
   var tbody = document.querySelector('#tabelaLotes tbody');
   if (!ordenado.length){
-    tbody.innerHTML = '<tr><td colspan="7" class="vazio-msg">Nenhum lote encontrado para os filtros selecionados.</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="10" class="vazio-msg">Nenhum lote encontrado para os filtros selecionados.</td></tr>';
     return;
   }
 
   tbody.innerHTML = ordenado.map(function(r){
     var meta = STATUS_META[r.status] || STATUS_META.VAZIO;
     var vencTxt = r.venc ? r.venc.split('-').reverse().join('/') : '-';
+    var fabTxt = r.fab ? r.fab.split('-').reverse().join('/') : '-';
     var dias = diasPara(r.venc);
     var diasTxt = dias === null ? '-' : (dias < 0 ? 'venceu há ' + Math.abs(dias) + 'd' : dias + 'd');
     return '<tr>' +
       '<td><span class="badge" style="background:' + meta.bg + ';color:' + meta.text + '">' + meta.label + '</span></td>' +
+      '<td>' + (r.codigo || '-') + '</td>' +
       '<td class="produto">' + (r.produto || '-') + '</td>' +
       '<td>' + (r.filial || '-') + '</td>' +
       '<td style="font-family:JetBrains Mono, monospace;">' + r.loc + '</td>' +
       '<td>' + (r.lote || '-') + '</td>' +
+      '<td>' + (r.estoque === null ? '-' : r.estoque) + '</td>' +
+      '<td>' + fabTxt + '</td>' +
       '<td>' + vencTxt + '</td>' +
       '<td>' + diasTxt + '</td>' +
     '</tr>';

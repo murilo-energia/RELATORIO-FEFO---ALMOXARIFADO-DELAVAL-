@@ -3,84 +3,72 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>BI Almoxarifado FEFO — Grupo Energia</title>
+<title>Almoxarifado FEFO — Grupo Energia</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
 <style>
   :root{
-    --orange: #DF7F24;
-    --orange-dark: #C56A16;
-    --charcoal: #252525;
-    --charcoal-2: #55534D;
-    --bg: #FAF7F2;
-    --card: #FFFFFF;
-    --border: #E8E2D8;
-    --ok: #4C8A2C;      --ok-bg: #EAF3DE;
-    --alerta: #C88A1E;  --alerta-bg: #FCEFD9;
-    --vencido: #B6392F; --vencido-bg: #FBE7E5;
-    --vazio: #8A887F;   --vazio-bg: #EFECE4;
-    --radius: 10px;
+    --orange:#DF7F24; --orange-dark:#C56A16;
+    --charcoal:#252525; --charcoal-2:#55534D;
+    --bg:#FAF7F2; --card:#FFFFFF; --border:#E8E2D8;
+    --ok:#4C8A2C; --ok-bg:#EAF3DE;
+    --alerta:#C88A1E; --alerta-bg:#FCEFD9;
+    --vencido:#B6392F; --vencido-bg:#FBE7E5;
+    --vazio:#8A887F; --vazio-bg:#EFECE4;
+    --radius:10px;
   }
   *{ box-sizing:border-box; }
-  body{
-    margin:0; background:var(--bg); color:var(--charcoal);
-    font-family:'Inter', sans-serif; padding:24px 16px 64px;
-  }
-  .wrap{ max-width:1100px; margin:0 auto; }
+  body{ margin:0; background:var(--bg); color:var(--charcoal); font-family:'Inter',sans-serif; padding:24px 16px 64px; }
+  .wrap{ max-width:1000px; margin:0 auto; }
 
-  header{
-    display:flex; align-items:flex-start; justify-content:space-between;
-    flex-wrap:wrap; gap:12px; margin-bottom:22px;
-  }
-  header h1{ font-family:'Manrope',sans-serif; font-weight:700; font-size:22px; margin:0 0 4px; }
+  header{ display:flex; align-items:flex-start; justify-content:space-between; flex-wrap:wrap; gap:12px; margin-bottom:18px; }
+  header h1{ font-family:'Manrope',sans-serif; font-weight:700; font-size:21px; margin:0 0 4px; }
   header p{ margin:0; font-size:13px; color:var(--charcoal-2); }
   #statusBar{ font-size:12px; color:var(--charcoal-2); display:flex; align-items:center; gap:8px; }
-  #statusBar button{
-    font-family:'Inter',sans-serif; font-size:12px; padding:6px 12px;
-    border-radius:var(--radius); border:1px solid var(--border); background:#fff;
-    cursor:pointer; color:var(--charcoal);
-  }
+  #statusBar button{ font-family:'Inter',sans-serif; font-size:12px; padding:6px 12px; border-radius:var(--radius); border:1px solid var(--border); background:#fff; cursor:pointer; color:var(--charcoal); }
   #statusBar button:hover{ border-color:var(--orange); color:var(--orange-dark); }
 
-  .filtros{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:20px; }
-  .filtros select{
-    font-family:'Inter',sans-serif; font-size:13px; padding:9px 12px;
-    border-radius:var(--radius); border:1px solid var(--border); background:#fff;
-    color:var(--charcoal); min-width:140px; flex:1;
-  }
-
-  .kpis{ display:grid; grid-template-columns:repeat(auto-fit, minmax(160px,1fr)); gap:12px; margin-bottom:18px; }
+  .kpis{ display:grid; grid-template-columns:repeat(auto-fit, minmax(150px,1fr)); gap:12px; margin-bottom:18px; }
   .kpi{ background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px; border-left:3px solid var(--orange); }
   .kpi span{ display:block; font-size:12px; color:var(--charcoal-2); margin-bottom:4px; }
-  .kpi strong{ font-family:'Manrope',sans-serif; font-size:26px; font-weight:700; }
-  .kpi small{ display:block; font-size:11px; color:var(--charcoal-2); margin-top:2px; }
+  .kpi strong{ font-family:'Manrope',sans-serif; font-size:24px; font-weight:700; }
 
-  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-bottom:16px; }
-  @media (max-width: 760px){ .grid2{ grid-template-columns:1fr; } }
+  nav.menu{ display:flex; gap:6px; margin-bottom:16px; border-bottom:1px solid var(--border); }
+  nav.menu button{
+    font-family:'Inter',sans-serif; font-size:13px; font-weight:500; padding:10px 16px;
+    border:none; background:transparent; color:var(--charcoal-2); cursor:pointer;
+    border-bottom:2px solid transparent; margin-bottom:-1px;
+  }
+  nav.menu button.ativo{ color:var(--orange-dark); border-bottom-color:var(--orange); }
 
-  section{ background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px; margin-bottom:16px; }
-  section h2{ font-family:'Manrope',sans-serif; font-size:14px; font-weight:600; margin:0 0 4px; }
-  section .sub{ font-size:12px; color:var(--charcoal-2); margin:0 0 14px; }
-  .chart-box{ position:relative; height:240px; }
-  .chart-box.tall{ height:280px; }
+  .painel{ display:none; }
+  .painel.ativo{ display:block; }
+
+  .filtros{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
+  .filtros select, .filtros input{ font-family:'Inter',sans-serif; font-size:13px; padding:9px 12px; border-radius:var(--radius); border:1px solid var(--border); background:#fff; color:var(--charcoal); }
+  .filtros select{ flex:1; min-width:130px; }
+  .filtros input{ flex:2; min-width:180px; }
+
+  section{ background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; margin-bottom:16px; }
+  section h2{ font-family:'Manrope',sans-serif; font-size:14px; font-weight:600; margin:0 0 12px; }
 
   table{ width:100%; border-collapse:collapse; font-size:13px; }
-  th{ text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.02em; color:var(--charcoal-2); font-weight:600; padding:0 8px 8px; border-bottom:1px solid var(--border); }
-  td{ padding:9px 8px; border-bottom:1px solid var(--border); vertical-align:middle; }
+  th{ text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.02em; color:var(--charcoal-2); font-weight:600; padding:0 8px 8px; border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--card); }
+  td{ padding:9px 8px; border-bottom:1px solid var(--border); vertical-align:middle; white-space:nowrap; }
+  td.produto{ white-space:normal; }
   tr:last-child td{ border-bottom:none; }
-  .barra-mini{ height:6px; border-radius:4px; background:var(--vazio-bg); overflow:hidden; margin-top:4px; }
-  .barra-mini i{ display:block; height:100%; background:var(--vencido); }
+  .tabela-scroll{ max-height:520px; overflow:auto; }
 
-  .badge{ font-size:11px; font-weight:600; padding:3px 9px; border-radius:20px; white-space:nowrap; }
+  .badge{ font-size:11px; font-weight:600; padding:3px 9px; border-radius:20px; white-space:nowrap; display:inline-block; }
 
-  #toast{
-    position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(20px);
-    background:var(--charcoal); color:#fff; padding:10px 18px; border-radius:var(--radius);
-    font-size:13px; opacity:0; pointer-events:none; transition:all .25s ease;
-  }
+  .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+  @media (max-width:720px){ .grid2{ grid-template-columns:1fr; } }
+  .chart-box{ position:relative; height:260px; }
+
+  #toast{ position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--charcoal); color:#fff; padding:10px 18px; border-radius:var(--radius); font-size:13px; opacity:0; pointer-events:none; transition:all .25s ease; }
   #toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
-  .vazio-msg{ font-size:13px; color:var(--charcoal-2); }
+  .vazio-msg{ font-size:13px; color:var(--charcoal-2); padding:12px 0; }
 </style>
 </head>
 <body>
@@ -88,8 +76,8 @@
 
   <header>
     <div>
-      <h1>BI Almoxarifado — Controle FEFO</h1>
-      <p>Indicadores, tendência e prioridade de vencimento — Delaval</p>
+      <h1>Almoxarifado FEFO — Delaval</h1>
+      <p>Controle de lotes e vencimentos</p>
     </div>
     <div id="statusBar">
       <span id="ultimaAtualizacao">Carregando...</span>
@@ -97,43 +85,48 @@
     </div>
   </header>
 
-  <div class="filtros">
-    <select id="fFilial"></select>
-    <select id="fDep"></select>
-  </div>
-
   <div class="kpis" id="kpis"></div>
 
-  <div class="grid2">
+  <nav class="menu">
+    <button data-painel="tabela" class="ativo">Tabela</button>
+    <button data-painel="dashboards">Dashboards</button>
+  </nav>
+
+  <!-- ===================== PAINEL: TABELA ===================== -->
+  <div id="painel-tabela" class="painel ativo">
+    <div class="filtros">
+      <select id="fFilial"></select>
+      <select id="fDep"></select>
+      <select id="fStatus"></select>
+      <input id="fBusca" type="text" placeholder="Buscar produto ou lote">
+    </div>
     <section>
-      <h2>Distribuição de status</h2>
-      <p class="sub">Situação atual de todos os lotes filtrados</p>
-      <div class="chart-box"><canvas id="chartStatus"></canvas></div>
-    </section>
-    <section>
-      <h2>Vencimentos por mês</h2>
-      <p class="sub">Volume de lotes que vencem nos próximos 12 meses</p>
-      <div class="chart-box"><canvas id="chartMeses"></canvas></div>
+      <div class="tabela-scroll">
+        <table id="tabelaLotes">
+          <thead>
+            <tr>
+              <th>Status</th><th>Produto</th><th>Filial</th><th>Localização</th>
+              <th>Lote</th><th>Vencimento</th><th>Dias</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </section>
   </div>
 
-  <section>
-    <h2>Evolução histórica</h2>
-    <p class="sub" id="subHistorico">Nº de lotes por status ao longo do tempo</p>
-    <div class="chart-box tall"><canvas id="chartHistorico"></canvas></div>
-  </section>
-
-  <div class="grid2">
-    <section>
-      <h2>Produtos mais críticos</h2>
-      <p class="sub">Ranking por lotes em alerta ou vencidos</p>
-      <table id="tabelaRanking"><thead><tr><th>Produto</th><th>Em risco</th></tr></thead><tbody></tbody></table>
-    </section>
-    <section>
-      <h2>Comparativo por filial</h2>
-      <p class="sub">Status dos lotes por filial</p>
-      <div class="chart-box"><canvas id="chartFilial"></canvas></div>
-    </section>
+  <!-- ===================== PAINEL: DASHBOARDS ===================== -->
+  <div id="painel-dashboards" class="painel">
+    <div class="grid2">
+      <section>
+        <h2>Distribuição de status</h2>
+        <div class="chart-box"><canvas id="chartStatus"></canvas></div>
+      </section>
+      <section>
+        <h2>Vencimentos por mês (próximos 12)</h2>
+        <div class="chart-box"><canvas id="chartMeses"></canvas></div>
+      </section>
+    </div>
   </div>
 
 </div>
@@ -144,14 +137,18 @@
 /* ============================================================
    CONFIGURAÇÃO — cole aqui a URL do Web App do Apps Script
    ============================================================ */
-var GAS_URL = 'COLE_AQUI_A_URL_DO_WEB_APP';
+var GAS_URL = 'https://script.google.com/macros/s/AKfycbxX1a2b3c4d5e6f7g8h9i0jkLlMmNnOoPpQqRrSsTtUvW/exec';
 var AUTO_REFRESH_MINUTOS = 5;
 
-var CORES = {
-  OK: '#4C8A2C', ALERTA: '#C88A1E', VENCIDO: '#B6392F', VAZIO: '#8A887F', ORANGE: '#DF7F24'
+var STATUS_META = {
+  OK:      { bg:'var(--ok-bg)',      text:'var(--ok)',      label:'OK' },
+  ALERTA:  { bg:'var(--alerta-bg)',  text:'var(--alerta)',  label:'Alerta' },
+  VENCIDO: { bg:'var(--vencido-bg)', text:'var(--vencido)', label:'Vencido' },
+  VAZIO:   { bg:'var(--vazio-bg)',   text:'var(--vazio)',   label:'Vazio' }
 };
+var CORES = { OK:'#4C8A2C', ALERTA:'#C88A1E', VENCIDO:'#B6392F', VAZIO:'#8A887F', ORANGE:'#DF7F24' };
 
-var DADOS = { itens: [], historico: [] };
+var DADOS = [];
 var graficos = {};
 
 function toast(msg){
@@ -162,17 +159,28 @@ function toast(msg){
 }
 
 function uniq(arr){
-  var s = {};
-  arr.forEach(function(v){ if (v) s[v] = true; });
+  var s = {}; arr.forEach(function(v){ if (v) s[v] = true; });
   return Object.keys(s).sort();
 }
 
-function preencherSelect(id, labelPadrao, opcoes){
+function preencherSelect(id, labelPadrao, opcoes, mapaLabel){
   var el = document.getElementById(id);
-  el.innerHTML = '<option value="">' + labelPadrao + '</option>' +
-    opcoes.map(function(o){ return '<option value="' + o + '">' + o + '</option>'; }).join('');
+  var html = '<option value="">' + labelPadrao + '</option>';
+  opcoes.forEach(function(o){
+    var texto = (mapaLabel && mapaLabel[o]) ? mapaLabel[o].label : o;
+    html += '<option value="' + o + '">' + texto + '</option>';
+  });
+  el.innerHTML = html;
 }
 
+function diasPara(dataStr){
+  if (!dataStr) return null;
+  var hoje = new Date(); hoje.setHours(0,0,0,0);
+  var d = new Date(dataStr + 'T00:00:00');
+  return Math.round((d - hoje) / 86400000);
+}
+
+// ---------- Carregamento ----------
 function carregar(forcar){
   if (GAS_URL.indexOf('COLE_AQUI') === 0) {
     toast('Configure a variável GAS_URL no topo do script.');
@@ -183,8 +191,7 @@ function carregar(forcar){
     .then(function(r){ return r.json(); })
     .then(function(json){
       if (json.erro) { toast('Erro: ' + json.mensagem); return; }
-      DADOS.itens = json.itens;
-      DADOS.historico = json.historico || [];
+      DADOS = json.itens;
       montarFiltros();
       renderizarTudo();
       var dt = new Date(json.geradoEm);
@@ -198,49 +205,78 @@ function carregar(forcar){
 }
 
 function montarFiltros(){
-  preencherSelect('fFilial', 'Todas as filiais', uniq(DADOS.itens.map(function(r){ return r.filial; })));
-  preencherSelect('fDep', 'Todos os depósitos', uniq(DADOS.itens.map(function(r){ return r.dep; })));
+  preencherSelect('fFilial', 'Todas as filiais', uniq(DADOS.map(function(r){ return r.filial; })));
+  preencherSelect('fDep', 'Todos os depósitos', uniq(DADOS.map(function(r){ return r.dep; })));
+  preencherSelect('fStatus', 'Todos os status', uniq(DADOS.map(function(r){ return r.status; })), STATUS_META);
 }
 
 function getFiltrado(){
   var filial = document.getElementById('fFilial').value;
   var dep = document.getElementById('fDep').value;
-  return DADOS.itens.filter(function(r){
+  var status = document.getElementById('fStatus').value;
+  var busca = document.getElementById('fBusca').value.trim().toLowerCase();
+  return DADOS.filter(function(r){
     if (filial && r.filial !== filial) return false;
     if (dep && r.dep !== dep) return false;
+    if (status && r.status !== status) return false;
+    if (busca){
+      var alvo = ((r.produto||'') + ' ' + (r.lote||'')).toLowerCase();
+      if (alvo.indexOf(busca) === -1) return false;
+    }
     return true;
   });
 }
 
-function diasPara(dataStr){
-  if (!dataStr) return null;
-  var hoje = new Date(); hoje.setHours(0,0,0,0);
-  var d = new Date(dataStr + 'T00:00:00');
-  return Math.round((d - hoje) / 86400000);
-}
-
-// ---------- KPIs ----------
+// ---------- KPIs (compartilhados pelos dois painéis) ----------
 function renderKPIs(dados){
   var total = dados.length;
-  var ok = dados.filter(function(r){ return r.status === 'OK'; }).length;
-  var alerta = dados.filter(function(r){ return r.status === 'ALERTA'; }).length;
-  var vencido = dados.filter(function(r){ return r.status === 'VENCIDO'; }).length;
-  var vencendo30 = dados.filter(function(r){ var d = diasPara(r.venc); return d !== null && d >= 0 && d <= 30; }).length;
-  var pctRisco = total ? Math.round(((alerta + vencido) / total) * 100) : 0;
+  var ok = dados.filter(function(r){ return r.status==='OK'; }).length;
+  var alerta = dados.filter(function(r){ return r.status==='ALERTA'; }).length;
+  var vencido = dados.filter(function(r){ return r.status==='VENCIDO'; }).length;
 
   var cartoes = [
-    { label:'Total de lotes', valor:total, sub:'endereços com produto' },
-    { label:'Em risco (alerta + vencido)', valor:pctRisco + '%', sub:(alerta+vencido)+' de '+total+' lotes' },
-    { label:'Vencidos agora', valor:vencido, sub:'ação imediata' },
-    { label:'Vencendo em 30 dias', valor:vencendo30, sub:'planejar saída' }
+    { label:'Total de lotes', valor: total },
+    { label:'OK', valor: ok },
+    { label:'Alerta', valor: alerta },
+    { label:'Vencido', valor: vencido }
   ];
-
   document.getElementById('kpis').innerHTML = cartoes.map(function(c){
-    return '<div class="kpi"><span>' + c.label + '</span><strong>' + c.valor + '</strong><small>' + c.sub + '</small></div>';
+    return '<div class="kpi"><span>' + c.label + '</span><strong>' + c.valor + '</strong></div>';
   }).join('');
 }
 
-// ---------- Gráfico: distribuição de status (donut) ----------
+// ---------- Tabela ----------
+function renderTabela(dados){
+  var ordenado = dados.slice().sort(function(a,b){
+    var da = a.venc ? new Date(a.venc) : new Date('2999-12-31');
+    var db = b.venc ? new Date(b.venc) : new Date('2999-12-31');
+    return da - db;
+  });
+
+  var tbody = document.querySelector('#tabelaLotes tbody');
+  if (!ordenado.length){
+    tbody.innerHTML = '<tr><td colspan="7" class="vazio-msg">Nenhum lote encontrado para os filtros selecionados.</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = ordenado.map(function(r){
+    var meta = STATUS_META[r.status] || STATUS_META.VAZIO;
+    var vencTxt = r.venc ? r.venc.split('-').reverse().join('/') : '-';
+    var dias = diasPara(r.venc);
+    var diasTxt = dias === null ? '-' : (dias < 0 ? 'venceu há ' + Math.abs(dias) + 'd' : dias + 'd');
+    return '<tr>' +
+      '<td><span class="badge" style="background:' + meta.bg + ';color:' + meta.text + '">' + meta.label + '</span></td>' +
+      '<td class="produto">' + (r.produto || '-') + '</td>' +
+      '<td>' + (r.filial || '-') + '</td>' +
+      '<td style="font-family:JetBrains Mono, monospace;">' + r.loc + '</td>' +
+      '<td>' + (r.lote || '-') + '</td>' +
+      '<td>' + vencTxt + '</td>' +
+      '<td>' + diasTxt + '</td>' +
+    '</tr>';
+  }).join('');
+}
+
+// ---------- Dashboards ----------
 function renderChartStatus(dados){
   var contagem = { OK:0, ALERTA:0, VENCIDO:0, VAZIO:0 };
   dados.forEach(function(r){ contagem[r.status] = (contagem[r.status]||0) + 1; });
@@ -250,33 +286,22 @@ function renderChartStatus(dados){
   graficos.status = new Chart(ctx, {
     type: 'doughnut',
     data: {
-      labels: ['OK', 'Alerta', 'Vencido', 'Vazio'],
-      datasets: [{
-        data: [contagem.OK, contagem.ALERTA, contagem.VENCIDO, contagem.VAZIO],
-        backgroundColor: [CORES.OK, CORES.ALERTA, CORES.VENCIDO, CORES.VAZIO],
-        borderWidth: 0
-      }]
+      labels: ['OK','Alerta','Vencido','Vazio'],
+      datasets: [{ data:[contagem.OK, contagem.ALERTA, contagem.VENCIDO, contagem.VAZIO], backgroundColor:[CORES.OK, CORES.ALERTA, CORES.VENCIDO, CORES.VAZIO], borderWidth:0 }]
     },
-    options: {
-      maintainAspectRatio: false,
-      plugins: { legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 12 } } } }
-    }
+    options: { maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ font:{family:'Inter', size:12} } } } }
   });
 }
 
-// ---------- Gráfico: vencimentos por mês (próximos 12 meses) ----------
 function renderChartMeses(dados){
   var hoje = new Date(); hoje.setDate(1); hoje.setHours(0,0,0,0);
-  var meses = [];
-  var labels = [];
-  for (var i = 0; i < 12; i++) {
-    var d = new Date(hoje.getFullYear(), hoje.getMonth() + i, 1);
+  var meses = [], labels = [];
+  for (var i = 0; i < 12; i++){
+    var d = new Date(hoje.getFullYear(), hoje.getMonth()+i, 1);
     meses.push(d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0'));
     labels.push(d.toLocaleDateString('pt-BR', { month:'short', year:'2-digit' }));
   }
-
-  var contagem = {};
-  meses.forEach(function(m){ contagem[m] = 0; });
+  var contagem = {}; meses.forEach(function(m){ contagem[m]=0; });
   dados.forEach(function(r){
     if (!r.venc) return;
     var chave = r.venc.slice(0,7);
@@ -287,118 +312,33 @@ function renderChartMeses(dados){
   if (graficos.meses) graficos.meses.destroy();
   graficos.meses = new Chart(ctx, {
     type: 'bar',
-    data: {
-      labels: labels,
-      datasets: [{ data: meses.map(function(m){ return contagem[m]; }), backgroundColor: CORES.ORANGE, borderRadius: 4 }]
-    },
-    options: {
-      maintainAspectRatio: false,
-      plugins: { legend: { display: false } },
-      scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
-    }
-  });
-}
-
-// ---------- Gráfico: evolução histórica ----------
-function renderChartHistorico(){
-  var hist = DADOS.historico;
-  var ctx = document.getElementById('chartHistorico');
-
-  if (!hist || hist.length < 2) {
-    document.getElementById('subHistorico').textContent =
-      'Ainda coletando dados — o histórico é registrado automaticamente 1x por dia. Volte em alguns dias para ver a tendência.';
-    if (graficos.historico) { graficos.historico.destroy(); graficos.historico = null; }
-    return;
-  }
-  document.getElementById('subHistorico').textContent = 'Nº de lotes por status ao longo do tempo';
-
-  var labels = hist.map(function(h){ return h.data.split('-').reverse().join('/'); });
-  if (graficos.historico) graficos.historico.destroy();
-  graficos.historico = new Chart(ctx, {
-    type: 'line',
-    data: {
-      labels: labels,
-      datasets: [
-        { label:'OK', data: hist.map(function(h){return h.ok;}), borderColor: CORES.OK, backgroundColor: CORES.OK, tension:.3 },
-        { label:'Alerta', data: hist.map(function(h){return h.alerta;}), borderColor: CORES.ALERTA, backgroundColor: CORES.ALERTA, tension:.3 },
-        { label:'Vencido', data: hist.map(function(h){return h.vencido;}), borderColor: CORES.VENCIDO, backgroundColor: CORES.VENCIDO, tension:.3 }
-      ]
-    },
-    options: {
-      maintainAspectRatio: false,
-      plugins: { legend: { position:'bottom', labels:{ font:{family:'Inter', size:12} } } },
-      scales: { y: { beginAtZero:true, ticks:{ precision:0 } } }
-    }
-  });
-}
-
-// ---------- Ranking de produtos críticos ----------
-function renderRanking(dados){
-  var mapa = {};
-  dados.forEach(function(r){
-    if (r.status !== 'ALERTA' && r.status !== 'VENCIDO') return;
-    var chave = r.produto || 'Sem descrição';
-    mapa[chave] = (mapa[chave] || 0) + 1;
-  });
-  var lista = Object.keys(mapa).map(function(k){ return { produto:k, qtd:mapa[k] }; });
-  lista.sort(function(a,b){ return b.qtd - a.qtd; });
-  lista = lista.slice(0, 8);
-
-  var max = lista.length ? lista[0].qtd : 1;
-  var tbody = document.querySelector('#tabelaRanking tbody');
-  if (!lista.length) {
-    tbody.innerHTML = '<tr><td colspan="2" class="vazio-msg">Nenhum produto em risco nos filtros atuais.</td></tr>';
-    return;
-  }
-  tbody.innerHTML = lista.map(function(l){
-    var pct = Math.round((l.qtd / max) * 100);
-    return '<tr><td>' + l.produto + '<div class="barra-mini"><i style="width:' + pct + '%"></i></div></td><td>' + l.qtd + '</td></tr>';
-  }).join('');
-}
-
-// ---------- Comparativo por filial ----------
-function renderChartFilial(dados){
-  var filiais = uniq(dados.map(function(r){ return r.filial; }));
-  var porFilial = {};
-  filiais.forEach(function(f){ porFilial[f] = { OK:0, ALERTA:0, VENCIDO:0, VAZIO:0 }; });
-  dados.forEach(function(r){
-    if (!r.filial) return;
-    porFilial[r.filial][r.status] = (porFilial[r.filial][r.status] || 0) + 1;
-  });
-
-  var ctx = document.getElementById('chartFilial');
-  if (graficos.filial) graficos.filial.destroy();
-  graficos.filial = new Chart(ctx, {
-    type: 'bar',
-    data: {
-      labels: filiais,
-      datasets: [
-        { label:'OK', data: filiais.map(function(f){return porFilial[f].OK;}), backgroundColor: CORES.OK },
-        { label:'Alerta', data: filiais.map(function(f){return porFilial[f].ALERTA;}), backgroundColor: CORES.ALERTA },
-        { label:'Vencido', data: filiais.map(function(f){return porFilial[f].VENCIDO;}), backgroundColor: CORES.VENCIDO }
-      ]
-    },
-    options: {
-      maintainAspectRatio: false,
-      plugins: { legend: { position:'bottom', labels:{ font:{family:'Inter', size:12} } } },
-      scales: { x: { stacked:true }, y: { stacked:true, beginAtZero:true, ticks:{ precision:0 } } }
-    }
+    data: { labels:labels, datasets:[{ data: meses.map(function(m){ return contagem[m]; }), backgroundColor: CORES.ORANGE, borderRadius:4 }] },
+    options: { maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, ticks:{ precision:0 } } } }
   });
 }
 
 function renderizarTudo(){
   var dados = getFiltrado();
   renderKPIs(dados);
+  renderTabela(dados);
   renderChartStatus(dados);
   renderChartMeses(dados);
-  renderChartHistorico();
-  renderRanking(dados);
-  renderChartFilial(dados);
 }
 
-['fFilial', 'fDep'].forEach(function(id){
+// ---------- Navegação entre painéis ----------
+document.querySelectorAll('nav.menu button').forEach(function(btn){
+  btn.addEventListener('click', function(){
+    document.querySelectorAll('nav.menu button').forEach(function(b){ b.classList.remove('ativo'); });
+    document.querySelectorAll('.painel').forEach(function(p){ p.classList.remove('ativo'); });
+    btn.classList.add('ativo');
+    document.getElementById('painel-' + btn.dataset.painel).classList.add('ativo');
+  });
+});
+
+['fFilial','fDep','fStatus'].forEach(function(id){
   document.getElementById(id).addEventListener('change', renderizarTudo);
 });
+document.getElementById('fBusca').addEventListener('input', renderizarTudo);
 document.getElementById('btnAtualizar').addEventListener('click', function(){ carregar(true); });
 
 carregar(false);

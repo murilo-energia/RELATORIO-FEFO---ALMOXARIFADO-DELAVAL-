@@ -9,104 +9,139 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
 <style>
   :root{
-    --orange:#DF7F24; --orange-dark:#C56A16; --orange-light:#F3AD68;
-    --charcoal:#252525; --charcoal-2:#5B584F;
-    --bg:#FAF7F2; --card:#FFFFFF; --border:#E9E3D8;
-    --ok:#4C8A2C; --ok-bg:#EAF3DE;
-    --alerta:#C88A1E; --alerta-bg:#FCEFD9;
-    --vencido:#B6392F; --vencido-bg:#FBE7E5;
-    --vazio:#8A887F; --vazio-bg:#EFECE4;
-    --radius:10px;
+    --orange:#DF7F24; --orange-dark:#C56A16; --orange-soft:#FDF1E4;
+    --charcoal:#252525; --charcoal-2:#6B6862; --charcoal-3:#98958D;
+    --bg:#F7F5F1; --card:#FFFFFF; --border:#EBE6DC;
+    --ok:#3F7A22; --ok-bg:#EAF3DE;
+    --alerta:#B5790E; --alerta-bg:#FCEFD9;
+    --vencido:#AB3226; --vencido-bg:#FBE7E5;
+    --vazio:#84817A; --vazio-bg:#EFECE4;
+    --radius:12px; --radius-sm:8px;
+    --shadow: 0 1px 2px rgba(37,37,37,.04), 0 1px 8px rgba(37,37,37,.03);
   }
   *{ box-sizing:border-box; }
-  body{ margin:0; background:var(--bg); color:var(--charcoal); font-family:'Inter',sans-serif; padding:0 0 64px; }
-  .topo{ background:var(--charcoal); padding:18px 16px; }
-  .topo .wrap{ display:flex; align-items:center; gap:14px; }
-  .topo img{ height:38px; width:auto; display:block; }
-  .topo .titulos h1{ font-family:'Manrope',sans-serif; font-weight:700; font-size:19px; margin:0; color:#fff; }
-  .topo .titulos p{ margin:2px 0 0; font-size:12px; color:#C9C6BC; }
-  .topo .faixa{ height:3px; background:linear-gradient(90deg, var(--orange), var(--orange-light)); margin-top:18px; }
+  body{ margin:0; background:var(--bg); color:var(--charcoal); font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
+  .wrap{ max-width:1100px; margin:0 auto; padding:0 24px; }
 
-  .wrap{ max-width:1020px; margin:0 auto; padding:0 16px; }
-  .conteudo{ padding-top:20px; }
+  /* ---------- Cabeçalho claro ---------- */
+  header.topo{ background:var(--card); border-bottom:1px solid var(--border); }
+  header.topo .wrap{ display:flex; align-items:center; justify-content:space-between; gap:16px; padding:16px 24px; }
+  .marca{ display:flex; align-items:center; gap:12px; }
+  .marca img{ height:34px; width:auto; display:block; }
+  .marca .titulos h1{ font-family:'Manrope',sans-serif; font-weight:700; font-size:18px; margin:0; color:var(--charcoal); letter-spacing:-.01em; }
+  .marca .titulos p{ margin:1px 0 0; font-size:12px; color:var(--charcoal-2); }
+  .faixa{ height:3px; background:linear-gradient(90deg, var(--orange), #F0B978 60%, var(--orange-soft)); }
 
-  .barra-acoes{ display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:10px; margin-bottom:16px; }
-  #statusBar{ font-size:12px; color:var(--charcoal-2); display:flex; align-items:center; gap:8px; }
-  #statusBar button{ font-family:'Inter',sans-serif; font-size:12px; padding:7px 14px; border-radius:var(--radius); border:1px solid var(--border); background:#fff; cursor:pointer; color:var(--charcoal); font-weight:500; }
+  #statusBar{ font-size:12px; color:var(--charcoal-2); display:flex; align-items:center; gap:10px; }
+  #statusBar .ponto{ width:6px; height:6px; border-radius:50%; background:var(--ok); display:inline-block; }
+  #statusBar .ponto.falha{ background:var(--vencido); }
+  #statusBar button{
+    font-family:'Inter',sans-serif; font-size:12.5px; font-weight:600; padding:8px 16px;
+    border-radius:var(--radius-sm); border:1px solid var(--border); background:var(--card);
+    cursor:pointer; color:var(--charcoal); transition:all .15s ease;
+  }
   #statusBar button:hover{ border-color:var(--orange); color:var(--orange-dark); }
+  #statusBar button:disabled{ opacity:.6; cursor:default; }
 
-  .kpis{ display:grid; grid-template-columns:repeat(auto-fit, minmax(150px,1fr)); gap:12px; margin-bottom:18px; }
-  .kpi{ background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:14px 16px; border-left:3px solid var(--orange); }
-  .kpi span{ display:block; font-size:12px; color:var(--charcoal-2); margin-bottom:4px; }
-  .kpi strong{ font-family:'Manrope',sans-serif; font-size:26px; font-weight:800; }
-  .kpi.ok{ border-left-color:var(--ok); } .kpi.ok strong{ color:var(--ok); }
-  .kpi.alerta{ border-left-color:var(--alerta); } .kpi.alerta strong{ color:var(--alerta); }
-  .kpi.vencido{ border-left-color:var(--vencido); } .kpi.vencido strong{ color:var(--vencido); }
-
-  nav.menu{ display:flex; gap:6px; margin-bottom:16px; border-bottom:1px solid var(--border); }
-  nav.menu button{ font-family:'Inter',sans-serif; font-size:13px; font-weight:600; padding:10px 16px; border:none; background:transparent; color:var(--charcoal-2); cursor:pointer; border-bottom:2px solid transparent; margin-bottom:-1px; }
+  /* ---------- Navegação em destaque ---------- */
+  nav.menu{ background:var(--card); border-bottom:1px solid var(--border); position:sticky; top:0; z-index:10; }
+  nav.menu .wrap{ display:flex; gap:4px; padding:0 24px; }
+  nav.menu button{
+    font-family:'Manrope',sans-serif; font-size:14px; font-weight:700; padding:14px 20px;
+    border:none; background:transparent; color:var(--charcoal-3); cursor:pointer;
+    border-bottom:3px solid transparent; margin-bottom:-1px; transition:color .15s ease;
+  }
+  nav.menu button:hover{ color:var(--charcoal); }
   nav.menu button.ativo{ color:var(--orange-dark); border-bottom-color:var(--orange); }
+
+  .conteudo{ padding-top:22px; padding-bottom:60px; }
+
+  /* ---------- KPIs ---------- */
+  .kpis{ display:grid; grid-template-columns:repeat(auto-fit, minmax(160px,1fr)); gap:12px; margin-bottom:20px; }
+  .kpi{ background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; box-shadow:var(--shadow); }
+  .kpi span{ display:block; font-size:12px; color:var(--charcoal-2); margin-bottom:6px; font-weight:500; }
+  .kpi strong{ font-family:'Manrope',sans-serif; font-size:28px; font-weight:800; color:var(--charcoal); }
+  .kpi.ok strong{ color:var(--ok); } .kpi.alerta strong{ color:var(--alerta); } .kpi.vencido strong{ color:var(--vencido); }
 
   .painel{ display:none; }
   .painel.ativo{ display:block; }
 
+  /* ---------- Filtros ---------- */
   .filtros{ display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px; }
-  .filtros select, .filtros input{ font-family:'Inter',sans-serif; font-size:13px; padding:9px 12px; border-radius:var(--radius); border:1px solid var(--border); background:#fff; color:var(--charcoal); }
+  .filtros select, .filtros input{
+    font-family:'Inter',sans-serif; font-size:13px; padding:10px 12px; border-radius:var(--radius-sm);
+    border:1px solid var(--border); background:var(--card); color:var(--charcoal);
+  }
+  .filtros select:focus, .filtros input:focus{ outline:none; border-color:var(--orange); }
   .filtros select{ flex:1; min-width:130px; }
   .filtros input{ flex:2; min-width:180px; }
 
-  section{ background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:16px 18px; margin-bottom:16px; }
-  section h2{ font-family:'Manrope',sans-serif; font-size:14px; font-weight:700; margin:0 0 12px; }
+  section{ background:var(--card); border:1px solid var(--border); border-radius:var(--radius); padding:18px 20px; margin-bottom:16px; box-shadow:var(--shadow); }
+  section h2{ font-family:'Manrope',sans-serif; font-size:14px; font-weight:700; margin:0 0 14px; color:var(--charcoal); }
 
-  table{ width:100%; border-collapse:collapse; font-size:13px; }
-  th{ text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.02em; color:var(--charcoal-2); font-weight:700; padding:0 8px 8px; border-bottom:1px solid var(--border); position:sticky; top:0; background:var(--card); }
-  td{ padding:9px 8px; border-bottom:1px solid var(--border); vertical-align:middle; white-space:nowrap; }
-  td.produto{ white-space:normal; }
+  /* ---------- Tabela ---------- */
+  .tabela-scroll{ max-height:600px; overflow:auto; margin:0 -20px; padding:0 20px; }
+  table{ width:100%; border-collapse:collapse; font-size:13.5px; }
+  th{
+    text-align:left; font-size:11px; text-transform:uppercase; letter-spacing:.03em; color:var(--charcoal-2);
+    font-weight:700; padding:0 10px 10px; border-bottom:1px solid var(--border); position:sticky; top:0;
+    background:var(--card); cursor:pointer; user-select:none; white-space:nowrap;
+  }
+  th:hover{ color:var(--charcoal); }
+  th .seta{ font-size:9px; color:var(--charcoal-3); margin-left:3px; }
+  th.ativo .seta{ color:var(--orange-dark); }
+  th.num{ text-align:right; }
+  td{ padding:12px 10px; border-bottom:1px solid var(--border); vertical-align:middle; white-space:nowrap; }
+  td.produto{ white-space:nowrap; overflow:hidden; text-overflow:ellipsis; max-width:260px; }
+  td.num{ text-align:right; font-variant-numeric:tabular-nums; }
   tr:last-child td{ border-bottom:none; }
-  tr:hover td{ background:#FBF9F5; }
-  .tabela-scroll{ max-height:520px; overflow:auto; }
+  tr:hover td{ background:#FBFAF7; }
+  .mono{ font-family:'JetBrains Mono', monospace; font-size:12.5px; color:var(--charcoal-2); }
 
-  .badge{ font-size:11px; font-weight:700; padding:3px 9px; border-radius:20px; white-space:nowrap; display:inline-block; }
+  .badge{ font-size:11px; font-weight:700; padding:4px 10px; border-radius:20px; white-space:nowrap; display:inline-block; letter-spacing:.01em; }
 
+  /* ---------- Dashboards ---------- */
   .grid2{ display:grid; grid-template-columns:1fr 1fr; gap:16px; }
-  @media (max-width:720px){ .grid2{ grid-template-columns:1fr; } .topo .titulos p{ display:none; } }
-  .chart-box{ position:relative; height:260px; }
+  @media (max-width:760px){ .grid2{ grid-template-columns:1fr; } .marca .titulos p{ display:none; } }
+  .chart-box{ position:relative; height:280px; }
 
-  footer{ text-align:center; font-size:11px; color:var(--charcoal-2); margin-top:8px; }
+  footer{ text-align:center; font-size:11px; color:var(--charcoal-3); margin-top:8px; }
 
-  #toast{ position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--charcoal); color:#fff; padding:10px 18px; border-radius:var(--radius); font-size:13px; opacity:0; pointer-events:none; transition:all .25s ease; }
+  #toast{ position:fixed; bottom:20px; left:50%; transform:translateX(-50%) translateY(20px); background:var(--charcoal); color:#fff; padding:11px 20px; border-radius:var(--radius-sm); font-size:13px; opacity:0; pointer-events:none; transition:all .25s ease; box-shadow:0 4px 20px rgba(0,0,0,.2); }
   #toast.show{ opacity:1; transform:translateX(-50%) translateY(0); }
-  .vazio-msg{ font-size:13px; color:var(--charcoal-2); padding:12px 0; }
+  .vazio-msg{ font-size:13px; color:var(--charcoal-2); padding:20px 0; text-align:center; }
 </style>
 </head>
 <body>
 
-<div class="topo">
+<header class="topo">
   <div class="wrap">
-    <img src="logo.png" alt="Grupo Energia">
-    <div class="titulos">
-      <h1>Almoxarifado FEFO — Delaval</h1>
-      <p>Controle de lotes e vencimentos</p>
+    <div class="marca">
+      <img src="logo.png" alt="Grupo Energia">
+      <div class="titulos">
+        <h1>Almoxarifado FEFO — Delaval</h1>
+        <p>Controle de lotes e vencimentos</p>
+      </div>
     </div>
-  </div>
-</div>
-<div class="faixa"></div>
-
-<div class="wrap conteudo">
-
-  <div class="barra-acoes">
     <div id="statusBar">
+      <span class="ponto" id="pontoStatus"></span>
       <span id="ultimaAtualizacao">Carregando...</span>
       <button id="btnAtualizar" type="button">Atualizar</button>
     </div>
   </div>
+</header>
+<div class="faixa"></div>
 
-  <div class="kpis" id="kpis"></div>
-
-  <nav class="menu">
+<nav class="menu">
+  <div class="wrap">
     <button data-painel="tabela" class="ativo">Tabela</button>
     <button data-painel="dashboards">Dashboards</button>
-  </nav>
+  </div>
+</nav>
+
+<div class="wrap conteudo">
+
+  <div class="kpis" id="kpis"></div>
 
   <!-- ===================== PAINEL: TABELA ===================== -->
   <div id="painel-tabela" class="painel ativo">
@@ -121,8 +156,16 @@
         <table id="tabelaLotes">
           <thead>
             <tr>
-              <th>Status</th><th>Código</th><th>Produto</th><th>Filial</th><th>Localização</th>
-              <th>Lote</th><th>Estoque</th><th>Fabricação</th><th>Vencimento</th><th>Dias</th>
+              <th data-campo="status">Status <span class="seta">▾</span></th>
+              <th data-campo="codigo">Código <span class="seta">▾</span></th>
+              <th data-campo="produto">Produto <span class="seta">▾</span></th>
+              <th data-campo="filial">Filial <span class="seta">▾</span></th>
+              <th data-campo="loc">Localização <span class="seta">▾</span></th>
+              <th data-campo="lote">Lote <span class="seta">▾</span></th>
+              <th data-campo="estoque" class="num">Estoque <span class="seta">▾</span></th>
+              <th data-campo="fab">Fabricação <span class="seta">▾</span></th>
+              <th data-campo="venc" class="ativo">Vencimento <span class="seta">▾</span></th>
+              <th data-campo="dias" class="num">Dias <span class="seta">▾</span></th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -157,6 +200,8 @@
    ============================================================ */
 var GAS_URL = 'https://script.google.com/macros/s/AKfycbzt9PBe2bDZDVdgy4DJDcG3xae_cECczmy1tCK_njER36MJln_qapwdrLuAXywiKCKm/exec';
 var AUTO_REFRESH_MINUTOS = 5;
+var CACHE_KEY = 'fefo_cache_v1';
+var TIMEOUT_MS = 9000;
 
 var STATUS_META = {
   OK:      { bg:'var(--ok-bg)',      text:'var(--ok)',      label:'OK' },
@@ -164,10 +209,12 @@ var STATUS_META = {
   VENCIDO: { bg:'var(--vencido-bg)', text:'var(--vencido)', label:'Vencido' },
   VAZIO:   { bg:'var(--vazio-bg)',   text:'var(--vazio)',   label:'Vazio' }
 };
-var CORES = { OK:'#4C8A2C', ALERTA:'#C88A1E', VENCIDO:'#B6392F', VAZIO:'#8A887F', ORANGE:'#DF7F24' };
+var CORES = { OK:'#3F7A22', ALERTA:'#B5790E', VENCIDO:'#AB3226', VAZIO:'#84817A', ORANGE:'#DF7F24' };
 
 var DADOS = [];
 var graficos = {};
+var ordenacao = { campo: 'venc', dir: 1 };
+var painelAtual = 'tabela';
 
 function toast(msg){
   var el = document.getElementById('toast');
@@ -183,12 +230,14 @@ function uniq(arr){
 
 function preencherSelect(id, labelPadrao, opcoes, mapaLabel){
   var el = document.getElementById(id);
+  var atual = el.value;
   var html = '<option value="">' + labelPadrao + '</option>';
   opcoes.forEach(function(o){
     var texto = (mapaLabel && mapaLabel[o]) ? mapaLabel[o].label : o;
     html += '<option value="' + o + '">' + texto + '</option>';
   });
   el.innerHTML = html;
+  if (opcoes.indexOf(atual) !== -1) el.value = atual;
 }
 
 function diasPara(dataStr){
@@ -198,27 +247,71 @@ function diasPara(dataStr){
   return Math.round((d - hoje) / 86400000);
 }
 
-// ---------- Carregamento ----------
-function carregar(forcar){
-  document.getElementById('ultimaAtualizacao').textContent = 'Carregando...';
-  fetch(GAS_URL + (forcar ? '?forcar=1' : ''))
+function marcarStatusConexao(ok, mensagemExtra){
+  var ponto = document.getElementById('pontoStatus');
+  var texto = document.getElementById('ultimaAtualizacao');
+  ponto.classList.toggle('falha', !ok);
+  if (mensagemExtra) texto.textContent = mensagemExtra;
+}
+
+// ---------- Cache local (carregamento instantâneo em revisitas) ----------
+function salvarCache(json){
+  try { localStorage.setItem(CACHE_KEY, JSON.stringify({ dados: json, quando: Date.now() })); }
+  catch (e) { /* silencioso: se o navegador bloquear, apenas não cacheia */ }
+}
+function lerCache(){
+  try {
+    var raw = localStorage.getItem(CACHE_KEY);
+    if (!raw) return null;
+    return JSON.parse(raw);
+  } catch (e) { return null; }
+}
+
+// ---------- Fetch com timeout + 1 nova tentativa ----------
+function buscarComTimeout(url, tentativa){
+  var controller = new AbortController();
+  var timer = setTimeout(function(){ controller.abort(); }, TIMEOUT_MS);
+  return fetch(url, { signal: controller.signal })
     .then(function(r){
+      clearTimeout(timer);
       if (!r.ok) throw new Error('HTTP ' + r.status);
       return r.json();
     })
+    .catch(function(err){
+      clearTimeout(timer);
+      if (!tentativa) {
+        return new Promise(function(resolve){ setTimeout(resolve, 1200); })
+          .then(function(){ return buscarComTimeout(url, 1); });
+      }
+      throw err;
+    });
+}
+
+// ---------- Carregamento ----------
+function carregar(forcar){
+  var btn = document.getElementById('btnAtualizar');
+  btn.disabled = true; btn.textContent = 'Atualizando...';
+
+  buscarComTimeout(GAS_URL + (forcar ? '?forcar=1' : ''), false)
     .then(function(json){
-      if (json.erro) { toast('Erro no backend: ' + json.mensagem); document.getElementById('ultimaAtualizacao').textContent = 'Erro ao carregar'; return; }
+      if (json.erro) { throw new Error(json.mensagem || 'Erro desconhecido no backend'); }
       DADOS = json.itens || [];
-      if (!DADOS.length) toast('A planilha respondeu, mas nenhum lote foi encontrado.');
+      salvarCache(json);
       montarFiltros();
       renderizarTudo();
       var dt = new Date(json.geradoEm);
-      document.getElementById('ultimaAtualizacao').textContent =
-        'Atualizado às ' + dt.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' });
+      marcarStatusConexao(true, 'Atualizado às ' + dt.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }));
     })
     .catch(function(err){
-      toast('Não foi possível conectar ao backend (' + err.message + ').');
-      document.getElementById('ultimaAtualizacao').textContent = 'Falha ao atualizar';
+      if (DADOS.length){
+        marcarStatusConexao(false, 'Falha ao buscar dados novos — mostrando última versão salva');
+      } else {
+        marcarStatusConexao(false, 'Não foi possível carregar os dados');
+        toast('Erro: ' + err.message);
+      }
+    })
+    .finally(function(){
+      btn.disabled = false; btn.textContent = 'Atualizar';
     });
 }
 
@@ -263,12 +356,26 @@ function renderKPIs(dados){
   }).join('');
 }
 
-// ---------- Tabela ----------
+// ---------- Tabela (com ordenação por coluna) ----------
+function valorOrdenacao(r, campo){
+  if (campo === 'dias') return diasPara(r.venc);
+  if (campo === 'estoque') return r.estoque === null ? -Infinity : Number(r.estoque);
+  if (campo === 'venc' || campo === 'fab') return r[campo] ? new Date(r[campo]).getTime() : Infinity;
+  return (r[campo] || '').toString().toLowerCase();
+}
+
 function renderTabela(dados){
+  var campo = ordenacao.campo, dir = ordenacao.dir;
   var ordenado = dados.slice().sort(function(a,b){
-    var da = a.venc ? new Date(a.venc) : new Date('2999-12-31');
-    var db = b.venc ? new Date(b.venc) : new Date('2999-12-31');
-    return da - db;
+    var va = valorOrdenacao(a, campo), vb = valorOrdenacao(b, campo);
+    if (va < vb) return -1 * dir;
+    if (va > vb) return 1 * dir;
+    return 0;
+  });
+
+  document.querySelectorAll('#tabelaLotes th').forEach(function(th){
+    th.classList.toggle('ativo', th.dataset.campo === campo);
+    th.querySelector('.seta').textContent = (th.dataset.campo === campo) ? (dir === 1 ? '▾' : '▴') : '▾';
   });
 
   var tbody = document.querySelector('#tabelaLotes tbody');
@@ -285,18 +392,27 @@ function renderTabela(dados){
     var diasTxt = dias === null ? '-' : (dias < 0 ? 'venceu há ' + Math.abs(dias) + 'd' : dias + 'd');
     return '<tr>' +
       '<td><span class="badge" style="background:' + meta.bg + ';color:' + meta.text + '">' + meta.label + '</span></td>' +
-      '<td>' + (r.codigo || '-') + '</td>' +
-      '<td class="produto">' + (r.produto || '-') + '</td>' +
+      '<td class="mono">' + (r.codigo || '-') + '</td>' +
+      '<td class="produto" title="' + (r.produto || '').replace(/"/g,'&quot;') + '">' + (r.produto || '-') + '</td>' +
       '<td>' + (r.filial || '-') + '</td>' +
-      '<td style="font-family:JetBrains Mono, monospace;">' + r.loc + '</td>' +
-      '<td>' + (r.lote || '-') + '</td>' +
-      '<td>' + (r.estoque === null ? '-' : r.estoque) + '</td>' +
+      '<td class="mono">' + r.loc + '</td>' +
+      '<td class="mono">' + (r.lote || '-') + '</td>' +
+      '<td class="num">' + (r.estoque === null ? '-' : r.estoque) + '</td>' +
       '<td>' + fabTxt + '</td>' +
       '<td>' + vencTxt + '</td>' +
-      '<td>' + diasTxt + '</td>' +
+      '<td class="num">' + diasTxt + '</td>' +
     '</tr>';
   }).join('');
 }
+
+document.querySelectorAll('#tabelaLotes th').forEach(function(th){
+  th.addEventListener('click', function(){
+    var campo = th.dataset.campo;
+    if (ordenacao.campo === campo) ordenacao.dir *= -1;
+    else { ordenacao.campo = campo; ordenacao.dir = 1; }
+    renderTabela(getFiltrado());
+  });
+});
 
 // ---------- Dashboards ----------
 function renderChartStatus(dados){
@@ -311,7 +427,7 @@ function renderChartStatus(dados){
       labels: ['OK','Alerta','Vencido','Vazio'],
       datasets: [{ data:[contagem.OK, contagem.ALERTA, contagem.VENCIDO, contagem.VAZIO], backgroundColor:[CORES.OK, CORES.ALERTA, CORES.VENCIDO, CORES.VAZIO], borderWidth:0 }]
     },
-    options: { maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ font:{family:'Inter', size:12} } } } }
+    options: { maintainAspectRatio:false, plugins:{ legend:{ position:'bottom', labels:{ font:{family:'Inter', size:12}, padding:16 } } } }
   });
 }
 
@@ -334,17 +450,23 @@ function renderChartMeses(dados){
   if (graficos.meses) graficos.meses.destroy();
   graficos.meses = new Chart(ctx, {
     type: 'bar',
-    data: { labels:labels, datasets:[{ data: meses.map(function(m){ return contagem[m]; }), backgroundColor: CORES.ORANGE, borderRadius:4 }] },
+    data: { labels:labels, datasets:[{ data: meses.map(function(m){ return contagem[m]; }), backgroundColor: CORES.ORANGE, borderRadius:4, maxBarThickness:32 }] },
     options: { maintainAspectRatio:false, plugins:{ legend:{ display:false } }, scales:{ y:{ beginAtZero:true, ticks:{ precision:0 } } } }
   });
+}
+
+function renderDashboards(dados){
+  // Recriar os gráficos aqui garante que o Chart.js meça o tamanho certo,
+  // já que o painel só fica com dimensões reais depois de ficar visível.
+  renderChartStatus(dados);
+  renderChartMeses(dados);
 }
 
 function renderizarTudo(){
   var dados = getFiltrado();
   renderKPIs(dados);
   renderTabela(dados);
-  renderChartStatus(dados);
-  renderChartMeses(dados);
+  if (painelAtual === 'dashboards') renderDashboards(dados);
 }
 
 // ---------- Navegação entre painéis ----------
@@ -353,7 +475,9 @@ document.querySelectorAll('nav.menu button').forEach(function(btn){
     document.querySelectorAll('nav.menu button').forEach(function(b){ b.classList.remove('ativo'); });
     document.querySelectorAll('.painel').forEach(function(p){ p.classList.remove('ativo'); });
     btn.classList.add('ativo');
-    document.getElementById('painel-' + btn.dataset.painel).classList.add('ativo');
+    painelAtual = btn.dataset.painel;
+    document.getElementById('painel-' + painelAtual).classList.add('ativo');
+    if (painelAtual === 'dashboards') renderDashboards(getFiltrado());
   });
 });
 
@@ -363,6 +487,15 @@ document.querySelectorAll('nav.menu button').forEach(function(btn){
 document.getElementById('fBusca').addEventListener('input', renderizarTudo);
 document.getElementById('btnAtualizar').addEventListener('click', function(){ carregar(true); });
 
+// ---------- Início: mostra cache instantaneamente, depois atualiza ----------
+var cache = lerCache();
+if (cache && cache.dados && cache.dados.itens){
+  DADOS = cache.dados.itens;
+  montarFiltros();
+  renderizarTudo();
+  var dt = new Date(cache.quando);
+  marcarStatusConexao(true, 'Dados salvos de ' + dt.toLocaleTimeString('pt-BR', { hour:'2-digit', minute:'2-digit' }));
+}
 carregar(false);
 if (AUTO_REFRESH_MINUTOS > 0){
   setInterval(function(){ carregar(false); }, AUTO_REFRESH_MINUTOS * 60 * 1000);
